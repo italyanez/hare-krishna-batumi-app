@@ -90,7 +90,7 @@ a, button, summary { -webkit-tap-highlight-color: transparent; touch-action: man
 
 /* 3. Каркас и навигация ------------------------------------------------------ */
 .sidebar { display: none; }
-.page { min-height: 100dvh; }
+.page { min-height: var(--app-h, 100vh); }
 .topbar {
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
   max-width: var(--content-max); margin: 0 auto;
@@ -425,7 +425,7 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
   background: transparent; color: var(--ink); overflow: visible;
 }
 .sheet-inner {
-  position: relative; max-height: 88vh; max-height: 88dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  position: relative; max-height: calc(var(--app-h, 100vh) * .88); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   background: var(--surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; box-shadow: var(--shadow-lg);
   padding: var(--space-3) var(--space-5) calc(var(--space-6) + var(--safe-bottom));
 }
@@ -487,7 +487,7 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 @media (min-width: 640px) {
   :root { --gutter: 24px; --fs-2xl: 34px; }
   .sheet { inset: 0; margin: auto; height: fit-content; }
-  .sheet-inner { max-height: 86vh; max-height: 86dvh; }
+  .sheet-inner { max-height: calc(var(--app-h, 100vh) * .86); }
   .sheet-inner { border-radius: var(--radius-lg); padding-bottom: var(--space-6); }
   .sheet-grip { display: none; }
   .sheet-body { padding-top: var(--space-3); }

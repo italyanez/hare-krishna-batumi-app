@@ -4,11 +4,25 @@ const tg = window.Telegram?.WebApp;
 export const inTelegram = Boolean(tg?.initData);
 const supports = version => inTelegram && typeof tg.isVersionAtLeast === 'function' && tg.isVersionAtLeast(version);
 
+/**
+ * Высота окна приложения в пикселях → CSS-переменная --app-h.
+ * Единицы vh/dvh во встроенном браузере Telegram на macOS считаются неверно (почти ноль),
+ * поэтому высоту шторок считаем от реальной высоты окна.
+ */
+function syncHeight() {
+  const h = (inTelegram && tg.viewportStableHeight) || window.innerHeight;
+  if (h > 0) document.documentElement.style.setProperty('--app-h', `${Math.round(h)}px`);
+}
+syncHeight();
+window.addEventListener('resize', syncHeight);
+
 export function initTelegram({ onBack }) {
   if (!inTelegram) return;
+  tg.onEvent('viewportChanged', syncHeight);
   document.documentElement.classList.add('is-telegram');
   tg.ready();
   tg.expand();
+  syncHeight();
   if (supports('7.7')) tg.disableVerticalSwipes(); // чтобы прокрутка вверх не сворачивала приложение
   applyTheme();
   tg.onEvent('themeChanged', applyTheme);

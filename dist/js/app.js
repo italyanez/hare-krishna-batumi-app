@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=11';
-import { nowInBatumi, relativeDay } from './schedule.js?v=11';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=11';
-import * as V from './views.js?v=11';
+import { icon } from './icons.js?v=12';
+import { nowInBatumi, relativeDay } from './schedule.js?v=12';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=12';
+import * as V from './views.js?v=12';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
