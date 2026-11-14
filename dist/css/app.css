@@ -98,10 +98,11 @@ a, button, summary { -webkit-tap-highlight-color: transparent; touch-action: man
 }
 .brand { display: flex; align-items: center; gap: var(--space-3); font-weight: 800; letter-spacing: .02em; line-height: 1.15; }
 .brand-mark {
-  width: 36px; height: 36px; border-radius: 50%; flex: none;
-  display: grid; place-items: center; background: var(--warm-soft); color: var(--warm);
+  width: 54px; height: 34px; flex: none;
+  background: var(--warm);
+  -webkit-mask: url('../img/iskcon-lotus.svg') center / contain no-repeat;
+  mask: url('../img/iskcon-lotus.svg') center / contain no-repeat;
 }
-.brand-mark::before { content: '☼'; font-size: 24px; line-height: 1; transform: translateY(-1px); }
 .brand-text { font-size: var(--fs-sm); text-transform: uppercase; }
 .brand-text small { display: block; font-size: var(--fs-xs); font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); }
 
