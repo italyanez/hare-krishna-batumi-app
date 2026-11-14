@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=9';
+import { icon } from './icons.js?v=11';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=9';
+} from './schedule.js?v=11';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -224,7 +224,7 @@ export function eventSheet(ctx, e) {
   const temple = contactById(ctx, 'temple');
   return `
   ${ctx.content.categories[e.category] !== e.title ? `<p class="overline">${esc(ctx.content.categories[e.category] || '')}</p>` : ''}
-  <h2 id="sheet-title" class="sheet-title">${esc(e.title)}</h2>
+  <h2 id="sheet-title" class="sheet-title" tabindex="-1">${esc(e.title)}</h2>
   <div class="status-box status-box--${e.live ? 'live' : STATUS[e.state].chip}">
     ${statusChip(e.state, e.live)}
     <p>${esc(e.note || STATUS[e.state].hint)}</p>
@@ -374,7 +374,7 @@ export function serviceSheet(ctx, s) {
   const c = contactById(ctx, 'temple');
   return `
   <p class="overline">Помочь храму</p>
-  <h2 id="sheet-title" class="sheet-title">${esc(s.title)}</h2>
+  <h2 id="sheet-title" class="sheet-title" tabindex="-1">${esc(s.title)}</h2>
   <ol class="flow">
     <li>
       <b>Скопируйте готовый текст</b>
@@ -466,7 +466,7 @@ export function recordsView(ctx) {
 /* ---------- Знакомство и состояния ---------- */
 
 export const welcomeSheet = () => `
-  <h2 id="sheet-title" class="sheet-title">Харе Кришна!</h2>
+  <h2 id="sheet-title" class="sheet-title" tabindex="-1">Харе Кришна!</h2>
   <p class="muted">Это приложение храма в Батуми. Здесь:</p>
   <ul class="welcome">
     <li>${icon('calendar')}<span><b>Расписание</b>Отметка «Анонсировано» значит, что храм объявил программу в канале</span></li>
@@ -488,6 +488,6 @@ export const errorView = channel => `
   </section>`;
 
 export const copyFallbackSheet = text => `
-  <h2 id="sheet-title" class="sheet-title">Скопируйте вручную</h2>
+  <h2 id="sheet-title" class="sheet-title" tabindex="-1">Скопируйте вручную</h2>
   <p class="muted">Браузер не дал скопировать автоматически. Нажмите на текст и удерживайте, чтобы выделить.</p>
   <textarea class="copy-area" readonly rows="${Math.min(8, text.split('\n').length + 1)}">${esc(text)}</textarea>`;

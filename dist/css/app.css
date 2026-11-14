@@ -421,21 +421,16 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 /* 6. Шторка и тост ----------------------------------------------------------- */
 .sheet {
   position: fixed; inset: auto 0 0; margin: 0 auto; padding: 0; border: 0;
-  width: 100%; max-width: 640px; max-height: min(88dvh, 100%);
+  width: 100%; max-width: 640px; max-height: none;
   background: transparent; color: var(--ink); overflow: visible;
 }
-.sheet::backdrop { background: rgb(10 14 12 / .45); animation: fade .2s ease; }
-.sheet[open] .sheet-inner { animation: slide-up .26s cubic-bezier(.2, .8, .2, 1); }
-.sheet.is-closing .sheet-inner { animation: slide-down .18s ease-in forwards; }
-.sheet.is-closing::backdrop { animation: fade .18s ease-in reverse forwards; }
-@keyframes slide-up { from { transform: translateY(100%); } }
-@keyframes slide-down { to { transform: translateY(100%); } }
-@keyframes fade { from { opacity: 0; } }
 .sheet-inner {
-  position: relative; max-height: min(88dvh, 100%); overflow-y: auto; overscroll-behavior: contain;
+  position: relative; max-height: 88vh; max-height: 88dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   background: var(--surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; box-shadow: var(--shadow-lg);
   padding: var(--space-3) var(--space-5) calc(var(--space-6) + var(--safe-bottom));
 }
+.sheet::backdrop { background: rgb(10 14 12 / .45); }
+.sheet-title:focus { outline: none; }
 .sheet-grip { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto var(--space-3); }
 .sheet-close { position: absolute; top: 12px; right: 12px; }
 .sheet-close .icon { width: 20px; height: 20px; }
@@ -491,13 +486,11 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 /* 7. Широкий экран ------------------------------------------------------------ */
 @media (min-width: 640px) {
   :root { --gutter: 24px; --fs-2xl: 34px; }
-  .sheet { inset: 0; margin: auto; max-height: 86dvh; }
+  .sheet { inset: 0; margin: auto; height: fit-content; }
+  .sheet-inner { max-height: 86vh; max-height: 86dvh; }
   .sheet-inner { border-radius: var(--radius-lg); padding-bottom: var(--space-6); }
   .sheet-grip { display: none; }
-  .sheet[open] .sheet-inner { animation: pop .2s ease; }
-  .sheet.is-closing .sheet-inner { animation: fade .15s ease-in reverse forwards; }
   .sheet-body { padding-top: var(--space-3); }
-  @keyframes pop { from { transform: scale(.97); opacity: 0; } }
   .sheet-actions { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
   .donate-strip { grid-template-columns: 1fr 1fr; align-items: center; }
   .service-list { grid-template-columns: 1fr 1fr; }

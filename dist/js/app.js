@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=9';
-import { nowInBatumi, relativeDay } from './schedule.js?v=9';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=9';
-import * as V from './views.js?v=9';
+import { icon } from './icons.js?v=11';
+import { nowInBatumi, relativeDay } from './schedule.js?v=11';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=11';
+import * as V from './views.js?v=11';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
@@ -98,17 +98,15 @@ function openSheet(html) {
     document.documentElement.classList.add('has-sheet');
   }
   sheet.querySelector('.sheet-inner').scrollTop = 0;
+  // Фокус на заголовок, а не на крестик: так нет рамки фокуса и экранный диктор читает заголовок
+  sheet.querySelector('.sheet-title')?.focus({ preventScroll: true });
   setBackButton(true);
 }
 
+// Без анимаций: встроенный браузер Telegram на macOS замирает на первом кадре анимации
+// внутри <dialog>, и шторка остаётся видна лишь на несколько пикселей.
 function closeSheet() {
-  if (!sheet.open) return;
-  sheet.classList.add('is-closing');
-  const done = () => {
-    sheet.classList.remove('is-closing');
-    sheet.close();
-  };
-  matchMedia('(prefers-reduced-motion: reduce)').matches ? done() : setTimeout(done, 180);
+  if (sheet.open) sheet.close();
 }
 
 sheet.addEventListener('close', () => {
