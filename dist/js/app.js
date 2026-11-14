@@ -1,22 +1,24 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=5';
-import { nowInBatumi, relativeDay } from './schedule.js?v=5';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=5';
-import * as V from './views.js?v=5';
+import { icon } from './icons.js?v=8';
+import { nowInBatumi, relativeDay } from './schedule.js?v=8';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=8';
+import * as V from './views.js?v=8';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
 const METHOD_KEY = 'hkb-donate-method';
+const WELCOME_KEY = 'hkb-welcomed';
 
 const TABS = [
   ['home', 'home', 'Главная'],
   ['schedule', 'calendar', 'Расписание'],
   ['donate', 'heart', 'Поддержать'],
-  ['service', 'hands', 'Служение'],
-  ['temple', 'temple', 'Храм'],
+  ['contact', 'chat', 'Связаться'],
+  ['newcomers', 'temple', 'Новичкам'],
 ];
-const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', service: 'Служение', temple: 'Храм', records: 'Лекции и трансляции' };
-const SUBPAGES = { records: 'temple' }; // подстраница → активная вкладка
+const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', contact: 'Связаться', newcomers: 'Впервые в храме', records: 'Лекции и трансляции' };
+const SUBPAGES = { records: 'contact' }; // подстраница → активная вкладка
+const ALIASES = { service: 'contact/service', temple: 'newcomers' }; // адреса прошлой версии
 
 const state = { content: null, filter: '', lastRoute: '' };
 const $ = sel => document.querySelector(sel);
@@ -49,9 +51,11 @@ const ctx = () => ({ content: state.content, now: nowInBatumi() });
 /* ---------- Маршрутизация ---------- */
 
 function parseRoute() {
-  const [page = 'home', arg = ''] = location.hash.replace(/^#/, '').split('/');
-  const known = page in TITLES ? page : 'home';
-  return { page: known, arg: known === page ? arg : '' };
+  let hash = location.hash.replace(/^#/, '');
+  const [first] = hash.split('/');
+  if (ALIASES[first]) hash = ALIASES[first];
+  const [page = 'home', arg = ''] = hash.split('/');
+  return page in TITLES ? { page, arg } : { page: 'home', arg: '' };
 }
 
 function render({ keepScroll = false } = {}) {
@@ -62,14 +66,13 @@ function render({ keepScroll = false } = {}) {
     home: () => V.homeView(c),
     schedule: () => V.scheduleView(c, state.filter),
     donate: () => V.donateView(c, arg || storage.get(METHOD_KEY)),
-    service: () => V.serviceView(c),
-    temple: () => V.templeView(c),
+    contact: () => V.contactView(c),
+    newcomers: () => V.newcomersView(c),
     records: () => V.recordsView(c),
   };
   main.innerHTML = views[page]();
   renderNav(SUBPAGES[page] || page);
   document.title = `${TITLES[page]} · Харе Кришна Батуми`;
-  $('[data-today]').textContent = relativeDay(c.now.date, c.now.date).replace('Сегодня, ', '');
   setBackButton(sheet.open || page in SUBPAGES);
 
   const routeKey = `${page}/${arg}`;
@@ -147,36 +150,49 @@ async function copyText(text) {
 
 async function handleCopy(el) {
   const text = el.dataset.copy;
-  if (await copyText(text)) {
-    haptic('success');
-    const label = el.dataset.copyLabel;
-    toast(label ? `${label}: скопировано` : 'Скопировано');
-    if (el.classList.contains('field-value')) {
-      document.querySelectorAll('.field-value.is-copied').forEach(x => x.classList.remove('is-copied'));
-      el.classList.add('is-copied');
-      setTimeout(() => el.classList.remove('is-copied'), 2000);
-    }
-    return true;
+  if (!(await copyText(text))) {
+    openSheet(V.copyFallbackSheet(text));
+    sheet.querySelector('textarea')?.select();
+    return;
   }
-  openSheet(V.copyFallbackSheet(text));
-  sheet.querySelector('textarea')?.select();
-  return false;
+  haptic('success');
+
+  if (el.classList.contains('field-value')) { // реквизит: подтверждение прямо в строке
+    document.querySelectorAll('.field-value.is-copied').forEach(x => x.classList.remove('is-copied'));
+    el.classList.add('is-copied');
+    setTimeout(() => el.classList.remove('is-copied'), 2500);
+    return;
+  }
+  if (el.dataset.reveal) { // служение: шаг 1 выполнен → показываем шаг 2
+    el.classList.replace('button--primary', 'button--done');
+    el.querySelector('span').textContent = 'Текст скопирован';
+    el.querySelector('.icon').outerHTML = icon('check');
+    const next = document.getElementById(el.dataset.reveal);
+    next?.classList.remove('is-waiting');
+    next?.querySelector('.button')?.classList.replace('button--secondary', 'button--primary');
+    return;
+  }
+  toast(el.dataset.copyLabel ? `${el.dataset.copyLabel}: скопировано` : 'Скопировано');
 }
 
 /* ---------- Действия ---------- */
 
 function shareEvent(id) {
-  const e = V.findEvent(ctx(), id);
-  if (!e) return;
   const c = ctx();
+  const e = V.findEvent(c, id);
+  if (!e) return;
   const place = c.content.places[e.place]?.name || '';
   const text = `${e.title} — ${relativeDay(e.date, c.now.date)}, ${e.start}. ${place}`;
-  const url = e.sources.at(-1) || c.content.links.channel;
-  openLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+  openLink(V.shareUrl(e.sources.at(-1) || c.content.links.channel, text));
+}
+
+function shareRequisites(id) {
+  const m = state.content.donations.methods.find(x => x.id === id);
+  if (m) openLink(V.shareUrl(state.content.links.siteDonations, V.requisitesText(m)));
 }
 
 document.addEventListener('click', async ev => {
-  const t = ev.target.closest('[data-event],[data-filter],[data-method],[data-copy],[data-service],[data-share],[data-action],[data-link]');
+  const t = ev.target.closest('[data-event],[data-filter],[data-method],[data-copy],[data-service],[data-share],[data-share-requisites],[data-action],[data-link]');
   if (!t) return;
   const d = t.dataset;
 
@@ -195,13 +211,9 @@ document.addEventListener('click', async ev => {
     if (s) openSheet(V.serviceSheet(ctx(), s));
     return;
   }
-  if (d.write) { // «Скопировать и написать»
-    await handleCopy(t);
-    openLink(`https://t.me/${d.write}`);
-    return;
-  }
   if (d.copy) { handleCopy(t); return; }
   if (d.share) { shareEvent(d.share); return; }
+  if (d.shareRequisites) { shareRequisites(d.shareRequisites); return; }
   if (d.action === 'close-sheet') { closeSheet(); return; }
   if (d.action === 'retry') { boot(); return; }
   if (t.hasAttribute('data-link') && inTelegram) { // внешние ссылки — через Telegram, чтобы не закрывать приложение
@@ -215,29 +227,38 @@ document.addEventListener('keydown', ev => {
   const tab = ev.target.closest?.('[role="tab"]');
   if (!tab || !['ArrowLeft', 'ArrowRight'].includes(ev.key)) return;
   const tabs = [...tab.parentElement.querySelectorAll('[role="tab"]')];
-  const next = tabs[(tabs.indexOf(tab) + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
-  next.click();
+  tabs[(tabs.indexOf(tab) + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length].click();
 });
 
 window.addEventListener('hashchange', () => { closeSheet(); render(); });
 
-// Обновляем статусы («Идёт сейчас», «Завершено») раз в минуту, если приложение открыто
+// Обновляем статусы («Идёт сейчас», «Прошло») раз в минуту, если приложение открыто
 setInterval(() => { if (!sheet.open && document.visibilityState === 'visible') render({ keepScroll: true }); }, 60_000);
 
 /* ---------- Запуск ---------- */
 
 function applyStartParam() {
   const p = startParam();
-  if (!p || location.hash) return;
+  if (!p || location.hash) return false;
   const [page, arg] = p.split('_'); // startapp=donate_usdt → #donate/usdt
-  if (page in TITLES) history.replaceState(null, '', `#${page}${arg ? `/${arg}` : ''}`);
+  if (!(page in TITLES) && !(page in ALIASES)) return false;
+  history.replaceState(null, '', `#${page}${arg ? `/${arg}` : ''}`);
+  return true;
 }
 
-async function boot() {
+function maybeWelcome(deepLinked) {
+  // Знакомство показываем один раз и не мешаем тому, кто пришёл по прямой ссылке на раздел
+  if (storage.get(WELCOME_KEY) || deepLinked || (location.hash && location.hash !== '#home')) return;
+  storage.set(WELCOME_KEY, '1');
+  openSheet(V.welcomeSheet());
+}
+
+async function boot(deepLinked = false) {
   main.innerHTML = '<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Загружаем расписание…</span></div>';
   try {
     state.content = await loadContent();
     render();
+    maybeWelcome(deepLinked);
   } catch {
     main.innerHTML = V.errorView('https://t.me/harekrishnabatumi');
     renderNav('home');
@@ -245,5 +266,4 @@ async function boot() {
 }
 
 initTelegram({ onBack: () => (sheet.open ? closeSheet() : (location.hash = SUBPAGES[parseRoute().page] || 'home')) });
-applyStartParam();
-boot();
+boot(applyStartParam());

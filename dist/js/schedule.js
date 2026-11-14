@@ -49,14 +49,28 @@ export function relativeDay(iso, today) {
   return label ? `${label}, ${formatDayMonth(iso)}` : full.charAt(0).toUpperCase() + full.slice(1);
 }
 
+// Для прихожанина различаем только то, что важно: объявлено ли событие в канале.
+// regular и tentative выглядят одинаково, но tentative даёт более осторожное пояснение.
 export const STATUS = {
-  confirmed: { label: 'Подтверждено', hint: 'Анонс опубликован в канале храма.' },
-  regular: { label: 'По расписанию', hint: 'Регулярная программа. Точное время публикуется в канале в день проведения.' },
-  tentative: { label: 'Время уточняется', hint: 'Время может отличаться от обычного — проверьте анонс в канале или спросите контакт храма.' },
-  moved: { label: 'Перенесено', hint: 'Программа перенесена на другой день.' },
-  cancelled: { label: 'Отменено', hint: 'Программа не состоится.' },
-  completed: { label: 'Завершено', hint: 'Программа уже прошла.' },
+  confirmed: { label: 'Анонсировано', chip: 'confirmed', hint: 'Храм объявил эту программу в канале.' },
+  regular: { label: 'Обычно в это время', chip: 'regular', hint: 'Регулярная программа. Анонс с точным временем обычно выходит в канале утром в день проведения.' },
+  tentative: { label: 'Обычно в это время', chip: 'regular', hint: 'Регулярная программа, но время бывает другим. Проверьте анонс в канале в день проведения.' },
+  moved: { label: 'Перенесено', chip: 'moved', hint: 'Программа перенесена на другой день.' },
+  cancelled: { label: 'Отменено', chip: 'cancelled', hint: 'Программа не состоится.' },
+  completed: { label: 'Прошло', chip: 'completed', hint: 'Программа уже прошла.' },
 };
+
+/** Ссылка «Добавить в Google Календарь». Время передаётся как местное с поясом Батуми. */
+export function calendarUrl(e, location) {
+  const stamp = (date, hhmm) => `${date.replaceAll('-', '')}T${hhmm.replace(':', '')}00`;
+  const endMin = toMinutes(e.end) ?? toMinutes(e.start) + DEFAULT_DURATION;
+  const end = `${String(Math.floor(endMin / 60)).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
+  const p = new URLSearchParams({
+    action: 'TEMPLATE', text: e.title, dates: `${stamp(e.date, e.start)}/${stamp(e.date, end)}`,
+    ctz: 'Asia/Tbilisi', location, details: 'Храм Харе Кришна, Батуми. Перед выходом проверьте анонс в канале: t.me/harekrishnabatumi',
+  });
+  return `https://calendar.google.com/calendar/render?${p}`;
+}
 
 /**
  * Собирает список событий на период: дата-события из content.events +
