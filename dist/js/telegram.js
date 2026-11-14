@@ -29,9 +29,8 @@ export function initTelegram({ onBack }) {
   if (supports('6.1')) tg.BackButton.onClick(onBack);
 }
 
-/** Тема Telegram (светлая/тёмная) → наши токены; цвет шапки Telegram совпадает с фоном приложения. */
+/** Приложение всегда в светлой теме; шапка и фон Telegram окрашиваются в цвет приложения. */
 function applyTheme() {
-  document.documentElement.dataset.theme = tg.colorScheme === 'dark' ? 'dark' : 'light';
   const css = getComputedStyle(document.documentElement);
   const bg = css.getPropertyValue('--bg').trim();
   try {
