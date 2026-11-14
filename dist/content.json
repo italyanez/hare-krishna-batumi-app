@@ -1,0 +1,248 @@
+{
+  "updatedAt": "2026-11-14T16:00:00+04:00",
+  "timezone": "Asia/Tbilisi",
+
+  "links": {
+    "channel": "https://t.me/harekrishnabatumi",
+    "chat": "https://t.me/+DjG5w7GD1ytlMjRi",
+    "site": "https://iskcone.com/batumi",
+    "siteDonations": "https://iskcone.com/batumi#donations",
+    "financialReport": { "title": "Финансовый отчёт за октябрь", "url": "https://t.me/harekrishnabatumi/2312" },
+    "lastBroadcast": { "title": "Трансляция 13 ноября · день ухода Шрилы Прабхупады", "url": "https://t.me/harekrishnabatumi/2318" }
+  },
+
+  "contacts": [
+    {
+      "id": "temple",
+      "name": "Связь с храмом",
+      "handle": "aravinda108",
+      "role": "Контакт, указанный на сайте храма",
+      "topics": ["Расписание и переносы", "Первый визит", "Служение", "Помощь с пожертвованием"]
+    },
+    {
+      "id": "education",
+      "name": "Алексей прабху",
+      "handle": "AL3ST",
+      "role": "Отдел образования",
+      "topics": ["Изучение писаний", "Наставничество в практике", "Подготовка к пранама-мантре и посвящению"]
+    }
+  ],
+
+  "places": {
+    "temple": { "name": "Храм", "address": "ул. Чайковского, 82", "query": "Batumi, Tchaikovsky St 82" },
+    "hilton": { "name": "У отеля Hilton", "address": "Старт харинамы", "query": "Hilton Batumi" },
+    "maharaj": { "name": "У ресторана Maharaj", "address": "Старт харинамы", "query": "Maharaj restaurant Batumi" }
+  },
+
+  "categories": {
+    "sunday": "Воскресная программа",
+    "kirtan": "Киртан и прасад",
+    "harinama": "Харинама",
+    "holiday": "Праздник",
+    "yoga": "Хатха-йога"
+  },
+
+  "regular": [
+    {
+      "id": "sunday",
+      "weekday": 0,
+      "title": "Воскресный пир любви",
+      "category": "sunday",
+      "start": "14:00",
+      "end": "18:00",
+      "place": "temple",
+      "status": "regular",
+      "note": "Вход свободный. Точное время и лектор публикуются в канале утром в день программы.",
+      "program": [["14:00", "Киртан"], ["15:00", "Чтение и обсуждение писаний"], ["16:00", "Киртан"], ["17:00", "Прасад — пир любви"]]
+    },
+    {
+      "id": "tuesday",
+      "weekday": 2,
+      "title": "Прасад и киртан",
+      "category": "kirtan",
+      "start": "17:00",
+      "end": "19:00",
+      "place": "temple",
+      "status": "tentative",
+      "note": "По сайту храма: прасад в 17:00, киртан в 18:00. Время бывает другим — проверьте анонс в канале.",
+      "program": [["17:00", "Прасад"], ["18:00", "Киртан"]]
+    },
+    {
+      "id": "thursday",
+      "weekday": 4,
+      "title": "Прасад и киртан",
+      "category": "kirtan",
+      "start": "17:00",
+      "end": "19:00",
+      "place": "temple",
+      "status": "tentative",
+      "note": "По сайту храма: прасад в 17:00, киртан в 18:00. 5 ноября прасад был в 15:00 — проверьте анонс в канале.",
+      "program": [["17:00", "Прасад"], ["18:00", "Киртан"]]
+    },
+    { "id": "yoga-mon", "weekday": 1, "title": "Хатха-йога", "category": "yoga", "start": "10:00", "end": "11:30", "place": "temple", "status": "tentative", "note": "Указано на сайте храма. Уточните у контакта храма, проходят ли занятия сейчас." },
+    { "id": "yoga-wed", "weekday": 3, "title": "Хатха-йога", "category": "yoga", "start": "10:00", "end": "11:30", "place": "temple", "status": "tentative", "note": "Указано на сайте храма. Уточните у контакта храма, проходят ли занятия сейчас." },
+    { "id": "yoga-fri", "weekday": 5, "title": "Хатха-йога", "category": "yoga", "start": "10:00", "end": "11:30", "place": "temple", "status": "tentative", "note": "Указано на сайте храма. Уточните у контакта храма, проходят ли занятия сейчас." }
+  ],
+
+  "events": [
+    {
+      "id": "2026-11-01-sunday", "series": "sunday", "date": "2026-11-01",
+      "title": "Воскресный пир любви", "category": "sunday", "start": "13:00", "end": "18:00", "place": "temple",
+      "status": "confirmed", "guest": "Дживанатх прабху",
+      "program": [["13:00", "Час силы — совместная джапа-медитация"], ["14:00", "Киртан"], ["15:00", "Лекция · Дживанатх прабху"], ["16:00", "Киртан"], ["17:00", "Прасад"]],
+      "sources": ["https://t.me/harekrishnabatumi/2304"]
+    },
+    {
+      "id": "2026-11-01-harinama", "date": "2026-11-01", "title": "Харинама", "category": "harinama",
+      "start": "17:00", "place": "maharaj", "status": "confirmed", "sources": ["https://t.me/harekrishnabatumi/2305"]
+    },
+    {
+      "id": "2026-11-02-harinama", "date": "2026-11-02", "title": "Харинама", "category": "harinama",
+      "start": "17:00", "place": "hilton", "status": "confirmed", "sources": ["https://t.me/harekrishnabatumi/2306"]
+    },
+    {
+      "id": "2026-11-05-thursday", "series": "thursday", "date": "2026-11-05",
+      "title": "Прасад и прощальный вечер с Дживанатхом прабху", "category": "kirtan", "start": "15:00", "end": "19:00", "place": "temple",
+      "status": "confirmed", "guest": "Дживанатх прабху",
+      "program": [["15:00", "Прасад"], ["17:00", "Прощальный вечер: киртан и общение"]],
+      "sources": ["https://t.me/harekrishnabatumi/2308"]
+    },
+    {
+      "id": "2026-11-08-sunday", "series": "sunday", "date": "2026-11-08",
+      "title": "Воскресный пир любви", "category": "sunday", "start": "13:00", "end": "18:00", "place": "temple",
+      "status": "confirmed", "guest": "Дживанатх прабху",
+      "program": [["13:00", "Час силы — совместная джапа-медитация"], ["14:00", "Киртан"], ["15:00", "Лекция · Дживанатх прабху"], ["16:00", "Киртан"], ["17:00", "Прасад"]],
+      "sources": ["https://t.me/harekrishnabatumi/2311"]
+    },
+    {
+      "id": "2026-11-10-govardhan", "series": "tuesday", "date": "2026-11-10",
+      "title": "Говардхана-пуджа", "category": "holiday", "start": "16:00", "end": "19:00", "place": "temple",
+      "status": "confirmed",
+      "program": [["16:00", "Прасад"], ["17:00", "Праздничная программа"]],
+      "sources": ["https://t.me/harekrishnabatumi/2313"]
+    },
+    {
+      "id": "2026-11-11-harinama", "date": "2026-11-11", "title": "Харинама", "category": "harinama",
+      "start": "17:00", "place": "maharaj", "status": "confirmed", "sources": ["https://t.me/harekrishnabatumi/2315"]
+    },
+    {
+      "id": "2026-11-12-thursday", "series": "thursday", "date": "2026-11-12",
+      "title": "Прасад и киртан", "category": "kirtan", "start": "17:00", "place": "temple",
+      "status": "moved", "movedTo": "2026-11-13-prabhupada",
+      "note": "Киртан и прасад перенесены на 13 ноября — день ухода Шрилы Прабхупады.",
+      "sources": ["https://t.me/harekrishnabatumi/2316"]
+    },
+    {
+      "id": "2026-11-13-prabhupada", "date": "2026-11-13",
+      "title": "День ухода Шрилы Прабхупады", "category": "holiday", "start": "16:00", "end": "19:00", "place": "temple",
+      "status": "confirmed", "guest": "Дживанатх прабху",
+      "note": "Программу и лекцию провёл Дживанатх прабху, ученик Шрилы Прабхупады. Шла трансляция в канале.",
+      "program": [["16:00", "Вегетарианский пир"], ["17:00", "Программа и лекция"]],
+      "sources": ["https://t.me/harekrishnabatumi/2317", "https://t.me/harekrishnabatumi/2318"]
+    },
+    {
+      "id": "2026-11-14-harinama", "date": "2026-11-14", "title": "Харинама", "category": "harinama",
+      "start": "17:00", "place": "hilton", "status": "cancelled", "guest": "Дживанатх прабху",
+      "note": "Отменена из-за дождя.",
+      "sources": ["https://t.me/harekrishnabatumi/2321", "https://t.me/harekrishnabatumi/2322"]
+    }
+  ],
+
+  "recordings": [],
+
+  "donations": {
+    "verifiedAt": "2026-11-14",
+    "methods": [
+      {
+        "id": "sber",
+        "title": "Сбербанк",
+        "subtitle": "Из России · по номеру телефона",
+        "fields": [
+          { "label": "Номер телефона", "value": "+7 929 279-93-00", "copy": "+79292799300", "format": "phone" },
+          { "label": "Получатель", "value": "Татьяна Игоревна С." }
+        ],
+        "steps": ["В приложении банка выберите перевод по номеру телефона", "Вставьте номер и выберите банк — Сбербанк", "Проверьте получателя: Татьяна Игоревна С."]
+      },
+      {
+        "id": "tbc",
+        "title": "TBC Bank",
+        "subtitle": "Из Грузии и других стран · IBAN / SWIFT",
+        "fields": [
+          { "label": "IBAN", "value": "GE48TB7070345061200003", "format": "iban" },
+          { "label": "Получатель", "value": "Tatiana Smolina" }
+        ],
+        "extra": {
+          "title": "Для международного перевода (SWIFT)",
+          "fields": [
+            { "label": "Банк", "value": "JSC TBC Bank" },
+            { "label": "SWIFT / BIC", "value": "TBCBGE22" },
+            { "label": "Город", "value": "Tbilisi, Georgia" }
+          ]
+        },
+        "steps": ["Для перевода внутри Грузии достаточно IBAN и получателя", "Из-за рубежа добавьте SWIFT-реквизиты", "Валюту счёта уточните у контакта храма перед крупным переводом"]
+      },
+      {
+        "id": "usdt",
+        "title": "USDT",
+        "subtitle": "Криптовалюта",
+        "network": "TRON (TRC20)",
+        "warning": "Отправляйте USDT только в сети TRON (TRC20). Перевод в другой сети — ERC20, BEP20, TON и т. д. — не дойдёт, и вернуть его будет невозможно.",
+        "fields": [
+          { "label": "Адрес кошелька · TRC20", "value": "TEAp4gtjZ722LPCmeaXWiuhKmRGsbm6zj7", "format": "address" }
+        ],
+        "steps": ["В кошельке или на бирже выберите вывод USDT", "Сеть — TRON (TRC20). Сверьте первые и последние символы адреса", "Учтите комиссию сети при выборе суммы"]
+      }
+    ],
+    "purposes": [
+      { "title": "Воскресный пир любви", "detail": "Прасад примерно на 40 человек", "amount": "3 000 ₽" },
+      { "title": "Сладости для харинамы", "detail": "200 штук для раздачи на улице", "amount": "2 000 ₽" },
+      { "title": "Книги для распространения", "detail": "На русском, грузинском и английском" },
+      { "title": "Аренда храма", "detail": "Главная ежемесячная статья расходов" }
+    ]
+  },
+
+  "services": [
+    {
+      "id": "sunday-kitchen",
+      "title": "Кухня и прасад",
+      "when": "По воскресеньям, до программы",
+      "text": "Помочь приготовить пир любви, разложить и раздать прасад. Можно начать с простых задач.",
+      "message": "Харе Кришна! Хочу помочь на кухне в воскресенье. Когда и во сколько можно прийти?"
+    },
+    {
+      "id": "sunday-cleaning",
+      "title": "Уборка и подготовка храма",
+      "when": "По воскресеньям, до и после программы",
+      "text": "Подготовить зал к программе и навести порядок после неё.",
+      "message": "Харе Кришна! Хочу помочь с уборкой храма в воскресенье. Во сколько лучше прийти?"
+    },
+    {
+      "id": "prasad-delivery",
+      "title": "Доставка прасада",
+      "when": "По воскресеньям, после программы",
+      "text": "Отвезти прасад тем, кто не смог прийти на программу.",
+      "message": "Харе Кришна! Могу развозить прасад после воскресной программы. Что для этого нужно?"
+    },
+    {
+      "id": "harinama",
+      "title": "Помощь на харинаме",
+      "when": "В дни харинамы, обычно к 17:00",
+      "text": "Подготовить и раздавать сладости, привезти инструменты к месту старта.",
+      "message": "Харе Кришна! Хочу помогать на харинамах — со сладостями или инструментами. Как присоединиться?"
+    },
+    {
+      "id": "kirtan",
+      "title": "Музыка на киртане",
+      "when": "На программах и выездных встречах",
+      "text": "Если играете на мриданге, караталах или фисгармонии — ваша помощь особенно ценна.",
+      "message": "Харе Кришна! Я играю на инструменте и могу помогать на киртанах. На чём нужнее всего?"
+    },
+    {
+      "id": "recording",
+      "title": "Запись лекций",
+      "when": "По воскресеньям",
+      "text": "Записывать звук или видео лекций и помогать публиковать их, чтобы появился архив.",
+      "message": "Харе Кришна! Могу помочь с записью и публикацией лекций. Что уже есть из техники?"
+    }
+  ]
+}
