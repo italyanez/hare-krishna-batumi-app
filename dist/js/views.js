@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=16';
+import { icon } from './icons.js?v=17';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=16';
+} from './schedule.js?v=17';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -482,7 +482,7 @@ export function prayersView(data) {
     ${data.prayers.map(p => `<a class="row" href="#prayers/${esc(p.id)}">${icon('book')}
       <span><b>${esc(p.title)}</b><small>${esc(p.subtitle)}${p.verses.length > 1 ? ` · ${verseCount(p.verses.length)}` : ''}</small></span>${icon('chevron')}</a>`).join('')}
   </div>
-  <p class="footnote">Тексты и переводы — с сайта <a href="${esc(data.source)}" target="_blank" rel="noopener" data-link>ISKCON One Love</a>. Там же — другие бхаджаны и аудиозаписи.</p>`;
+  <p class="footnote">Тексты и переводы — с сайтов <a href="${esc(data.source)}" target="_blank" rel="noopener" data-link>ISKCON One Love</a> и Vedabase. На ISKCON One Love — другие бхаджаны и аудиозаписи.</p>`;
 }
 
 export function prayerView(data, id, prefs) {
@@ -498,6 +498,7 @@ export function prayerView(data, id, prefs) {
     <h1>${esc(p.title)}</h1>
     <p class="lead">${esc(p.subtitle)}</p>
     ${p.when ? `<p class="prayer-when">${icon('clock')}${esc(p.when)}</p>` : ''}
+    ${p.intro ? `<p class="prayer-intro">${esc(p.intro)}</p>` : ''}
   </header>
 
   <div class="reader-tools" role="group" aria-label="Настройки чтения">
@@ -526,7 +527,7 @@ export function prayerView(data, id, prefs) {
     ${prev ? `<a class="card prayer-nav-link" href="#prayers/${esc(prev.id)}"><small>Предыдущая</small><b>${esc(prev.title)}</b></a>` : '<span></span>'}
     ${next ? `<a class="card prayer-nav-link prayer-nav-link--next" href="#prayers/${esc(next.id)}"><small>Следующая</small><b>${esc(next.title)}</b></a>` : '<span></span>'}
   </nav>
-  <p class="footnote">Источник: <a href="${esc(p.source)}" target="_blank" rel="noopener" data-link>iskcone.com</a></p>`;
+  <p class="footnote">Источник: <a href="${esc(p.source)}" target="_blank" rel="noopener" data-link>${esc(new URL(p.source).hostname)}</a>${p.copyright ? ` · ${esc(p.copyright)}` : ''}</p>`;
 }
 
 /* ---------- Знакомство и состояния ---------- */
