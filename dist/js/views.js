@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=26';
+import { icon } from './icons.js?v=27';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=26';
+} from './schedule.js?v=27';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -11,6 +11,13 @@ const ext = (url, label, cls = 'button button--secondary') =>
 const tme = handle => `https://t.me/${handle}`;
 const pageHead = (title, lead, extra = '') => `<header class="page-head"><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}${extra}</header>`;
 const sectionHead = (title, extra = '') => `<div class="section-head"><h2>${title}</h2>${extra}</div>`;
+/** Фото ответственного (как аватар в Telegram), а пока фото нет — инициалы. */
+export function avatar(c, size = 'md') {
+  if (c.photo) return `<img class="avatar avatar--${size}" src="${esc(c.photo)}" alt="${esc(c.name)}" loading="lazy" width="96" height="96">`;
+  const initials = c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  return `<span class="avatar avatar--${size} avatar--initials" aria-hidden="true">${esc(initials)}</span>`;
+}
+
 const contactById = (ctx, id) => ctx.content.contacts.find(c => c.id === id) || ctx.content.contacts[0];
 const isOff = e => e.state === 'cancelled' || e.state === 'moved';
 
@@ -352,7 +359,7 @@ export function contactView(ctx) {
   <div class="card card--flush rows">
     ${questions.map(q => {
       const c = contactById(ctx, q.contact);
-      return `<a class="row" href="${esc(tme(c.handle))}" target="_blank" rel="noopener" data-link>${icon('chat')}
+      return `<a class="row row--person" href="${esc(tme(c.handle))}" target="_blank" rel="noopener" data-link>${avatar(c, 'sm')}
         <span><b>${esc(q.title)}</b><small>${esc(c.name)} · @${esc(c.handle)}</small></span>${icon('external')}</a>`;
     }).join('')}
   </div>
@@ -361,13 +368,17 @@ export function contactView(ctx) {
     ${sectionHead('Помочь храму')}
     <p class="muted section-lead">Выберите, чем хотите помочь. Время и задачи договариваются лично в Telegram.</p>
     <div class="service-list">
-      ${services.map(s => `
+      ${services.map(s => {
+        const c = contactById(ctx, s.contact);
+        return `
         <button class="card service" type="button" data-service="${esc(s.id)}">
           <span class="service-title">${esc(s.title)}</span>
           <span class="service-when">${icon('clock')}${esc(s.when)}</span>
           <span class="service-text">${esc(s.text)}</span>
-          <span class="event-more">Хочу помочь${icon('chevron')}</span>
-        </button>`).join('')}
+          <span class="service-person">${avatar(c, 'xs')}<span>${esc(c.name)} · @${esc(c.handle)}</span></span>
+          <span class="event-more">${esc(s.cta || 'Хочу помочь')}${icon('chevron')}</span>
+        </button>`;
+      }).join('')}
     </div>
   </section>
 
@@ -388,10 +399,14 @@ const row = (url, ic, title, sub) =>
   `<a class="row" href="${esc(url)}" target="_blank" rel="noopener" data-link>${icon(ic)}<span><b>${esc(title)}</b><small>${esc(sub)}</small></span>${icon('external')}</a>`;
 
 export function serviceSheet(ctx, s) {
-  const c = contactById(ctx, 'temple');
+  const c = contactById(ctx, s.contact);
   return `
   <p class="overline">Помочь храму</p>
   <h2 id="sheet-title" class="sheet-title" tabindex="-1">${esc(s.title)}</h2>
+  <div class="person">
+    ${avatar(c, 'lg')}
+    <div><small>Ответственный</small><b>${esc(c.name)}</b><span>@${esc(c.handle)}${c.role ? ` · ${esc(c.role)}` : ''}</span></div>
+  </div>
   <ol class="flow">
     <li>
       <b>Скопируйте готовый текст</b>

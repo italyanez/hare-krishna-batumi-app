@@ -379,6 +379,22 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 .flow > li.is-waiting::before { background: var(--surface-2); color: var(--muted); }
 .button--done { background: var(--accent-soft); color: var(--accent); }
 
+/* Аватары ответственных */
+.avatar { flex: none; display: block; border-radius: 50%; object-fit: cover; background: var(--surface-2); }
+.avatar--xs { width: 24px; height: 24px; }
+.avatar--sm { width: 36px; height: 36px; }
+.avatar--lg { width: 64px; height: 64px; }
+.avatar--initials { display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 800; letter-spacing: .02em; }
+.avatar--xs.avatar--initials { font-size: 10px; }
+.avatar--sm.avatar--initials { font-size: 13px; }
+.avatar--lg.avatar--initials { font-size: 22px; }
+.row--person { grid-template-columns: 36px minmax(0, 1fr) 20px; }
+.service-person { display: flex; align-items: center; gap: var(--space-2); margin-top: 2px; font-size: var(--fs-sm); color: var(--muted); }
+.person { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-3); align-items: center; padding: var(--space-3); border-radius: 14px; background: var(--surface-2); }
+.person small { display: block; font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.person b { display: block; font-size: var(--fs-lg); line-height: 1.25; }
+.person span { display: block; font-size: var(--fs-sm); color: var(--muted); }
+
 /* Новичкам */
 .address { display: grid; gap: var(--space-3); }
 .address-line { font-size: var(--fs-xl); font-weight: 800; line-height: 1.2; }
