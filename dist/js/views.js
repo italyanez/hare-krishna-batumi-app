@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=13';
+import { icon } from './icons.js?v=15';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=13';
+} from './schedule.js?v=15';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -128,6 +128,12 @@ export function homeView(ctx) {
   </section>
 
   ${notifyCard(ctx)}
+
+  <a class="card link-card" href="#prayers">
+    ${icon('book')}
+    <span><b>Молитвы</b><small>Тексты и переводы молитв, которые поют на программах</small></span>
+    ${icon('chevron')}
+  </a>
 
   <a class="card link-card" href="#newcomers">
     ${icon('temple')}
@@ -357,8 +363,9 @@ export function contactView(ctx) {
   </section>
 
   <section class="section">
-    ${sectionHead('Канал, чат и записи')}
+    ${sectionHead('Материалы и новости')}
     <div class="card card--flush rows">
+      <a class="row" href="#prayers">${icon('book')}<span><b>Молитвы</b><small>Тексты и переводы для программ</small></span>${icon('chevron')}</a>
       ${row(links.channel, 'megaphone', 'Канал храма', 'Анонсы, переносы, трансляции, отчёты')}
       ${row(links.chat, 'chat', 'Чат сообщества', 'Общение с преданными')}
       <a class="row" href="#records">${icon('play')}<span><b>Лекции и трансляции</b><small>Прямые эфиры идут в канале</small></span>${icon('chevron')}</a>
@@ -461,6 +468,65 @@ export function recordsView(ctx) {
         <p class="muted">Когда лекции храма начнут публиковаться на YouTube, они появятся здесь. Нужны люди, которые помогут записывать.</p>
         <button class="text-link" type="button" data-service="recording">${icon('hands')}Помочь с записью</button>
       </section>`}`;
+}
+
+/* ---------- Молитвы ---------- */
+
+const verseCount = n => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'стих' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'стиха' : 'стихов'}`;
+
+export function prayersView(data) {
+  return `
+  <a class="back-link" href="#contact">${icon('chevron')}Связаться</a>
+  ${pageHead('Молитвы', 'Молитвы, которые поют на службах в храме: транслитерация и перевод.')}
+  <div class="card card--flush rows">
+    ${data.prayers.map(p => `<a class="row" href="#prayers/${esc(p.id)}">${icon('book')}
+      <span><b>${esc(p.title)}</b><small>${esc(p.subtitle)}${p.verses.length > 1 ? ` · ${verseCount(p.verses.length)}` : ''}</small></span>${icon('chevron')}</a>`).join('')}
+  </div>
+  <p class="footnote">Тексты и переводы — с сайта <a href="${esc(data.source)}" target="_blank" rel="noopener" data-link>ISKCON One Love</a>. Там же — другие бхаджаны и аудиозаписи.</p>`;
+}
+
+export function prayerView(data, id, prefs) {
+  const i = data.prayers.findIndex(p => p.id === id);
+  if (i < 0) return prayersView(data);
+  const p = data.prayers[i];
+  const prev = data.prayers[i - 1];
+  const next = data.prayers[i + 1];
+  const hasTranslation = p.verses.some(v => v.translation);
+  return `
+  <a class="back-link" href="#prayers">${icon('chevron')}Все молитвы</a>
+  <header class="page-head">
+    <h1>${esc(p.title)}</h1>
+    <p class="lead">${esc(p.subtitle)}</p>
+    ${p.when ? `<p class="prayer-when">${icon('clock')}${esc(p.when)}</p>` : ''}
+  </header>
+
+  <div class="reader-tools" role="group" aria-label="Настройки чтения">
+    ${hasTranslation ? `<button class="filter" type="button" data-action="toggle-translation" aria-pressed="${prefs.translation}">Перевод</button>` : ''}
+    <span class="reader-size">
+      <button class="filter" type="button" data-action="font-down" aria-label="Уменьшить шрифт" ${prefs.size <= 0 ? 'disabled' : ''}>A−</button>
+      <button class="filter" type="button" data-action="font-up" aria-label="Увеличить шрифт" ${prefs.size >= 2 ? 'disabled' : ''}>A+</button>
+    </span>
+  </div>
+
+  <article class="prayer size-${prefs.size} ${prefs.translation ? '' : 'no-translation'}">
+    ${p.verses.map((v, n) => `
+      <section class="verse">
+        ${p.verses.length > 1 ? `<span class="verse-num">${n + 1}</span>` : ''}
+        <p class="verse-text">${(Array.isArray(v.text) ? v.text : [v.text]).flat().map(l => `<span class="verse-line">${esc(l)}</span>`).join('')}</p>
+        ${v.translation ? `<p class="verse-translation">${esc(v.translation)}</p>` : ''}
+      </section>`).join('')}
+  </article>
+
+  ${p.commentary ? `<details class="section disclosure card">
+    <summary><span class="commentary-title">${esc(p.commentary.title)}</span>${icon('chevron', 'disclosure-icon')}</summary>
+    <div class="commentary">${p.commentary.paragraphs.map(t => `<p>${esc(t)}</p>`).join('')}</div>
+  </details>` : ''}
+
+  <nav class="prayer-nav" aria-label="Другие молитвы">
+    ${prev ? `<a class="card prayer-nav-link" href="#prayers/${esc(prev.id)}"><small>Предыдущая</small><b>${esc(prev.title)}</b></a>` : '<span></span>'}
+    ${next ? `<a class="card prayer-nav-link prayer-nav-link--next" href="#prayers/${esc(next.id)}"><small>Следующая</small><b>${esc(next.title)}</b></a>` : '<span></span>'}
+  </nav>
+  <p class="footnote">Источник: <a href="${esc(p.source)}" target="_blank" rel="noopener" data-link>iskcone.com</a></p>`;
 }
 
 /* ---------- Знакомство и состояния ---------- */

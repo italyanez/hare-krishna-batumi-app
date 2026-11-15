@@ -1,13 +1,14 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=13';
-import { nowInBatumi, relativeDay } from './schedule.js?v=13';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=13';
-import * as V from './views.js?v=13';
+import { icon } from './icons.js?v=15';
+import { nowInBatumi, relativeDay } from './schedule.js?v=15';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=15';
+import * as V from './views.js?v=15';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
 const METHOD_KEY = 'hkb-donate-method';
 const WELCOME_KEY = 'hkb-welcomed';
+const PRAYER_PREFS_KEY = 'hkb-prayer-prefs';
 
 const TABS = [
   ['home', 'home', 'Главная'],
@@ -16,19 +17,25 @@ const TABS = [
   ['contact', 'chat', 'Связаться'],
   ['newcomers', 'temple', 'Новичкам'],
 ];
-const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', contact: 'Связаться', newcomers: 'Впервые в храме', records: 'Лекции и трансляции' };
-const SUBPAGES = { records: 'contact' }; // подстраница → активная вкладка
+const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', contact: 'Связаться', newcomers: 'Впервые в храме', records: 'Лекции и трансляции', prayers: 'Молитвы' };
+const SUBPAGES = { records: 'contact', prayers: 'contact' }; // подстраница → активная вкладка
 const ALIASES = { service: 'contact/service', temple: 'newcomers' }; // адреса прошлой версии
-
-const state = { content: null, filter: '', lastRoute: '' };
-const $ = sel => document.querySelector(sel);
-const main = $('#main');
-const sheet = $('#sheet');
 
 const storage = {
   get(key) { try { return localStorage.getItem(key); } catch { return null; } },
   set(key, value) { try { localStorage.setItem(key, value); } catch { /* приватный режим — не критично */ } },
 };
+
+const state = { content: null, prayers: null, filter: '', lastRoute: '' };
+
+// Настройки чтения молитв: показывать перевод, размер шрифта 0–2. Хранятся на устройстве.
+const prayerPrefs = (() => {
+  try { return { translation: true, size: 1, ...JSON.parse(storage.get(PRAYER_PREFS_KEY) || '{}') }; } catch { return { translation: true, size: 1 }; }
+})();
+const $ = sel => document.querySelector(sel);
+const main = $('#main');
+const sheet = $('#sheet');
+
 
 /* ---------- Данные ---------- */
 
@@ -44,6 +51,16 @@ async function loadContent() {
     if (cached) return JSON.parse(cached);
     throw err;
   }
+}
+
+// Молитвы загружаются только при первом открытии раздела, чтобы не замедлять главную
+let prayersLoading = null;
+function loadPrayers() {
+  prayersLoading ||= fetch('prayers.json?v=15', { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { state.prayers = data; render({ keepScroll: true }); })
+    .catch(() => { prayersLoading = null; main.innerHTML = V.errorView('https://iskcone.com/ru/bhajans'); });
+  return prayersLoading;
 }
 
 const ctx = () => ({ content: state.content, now: nowInBatumi() });
@@ -69,6 +86,10 @@ function render({ keepScroll = false } = {}) {
     contact: () => V.contactView(c),
     newcomers: () => V.newcomersView(c),
     records: () => V.recordsView(c),
+    prayers: () => {
+      if (!state.prayers) { loadPrayers(); return '<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Загружаем молитвы…</span></div>'; }
+      return arg ? V.prayerView(state.prayers, arg, prayerPrefs) : V.prayersView(state.prayers);
+    },
   };
   main.innerHTML = views[page]();
   renderNav(SUBPAGES[page] || page);
@@ -214,6 +235,14 @@ document.addEventListener('click', async ev => {
   if (d.shareRequisites) { shareRequisites(d.shareRequisites); return; }
   if (d.action === 'close-sheet') { closeSheet(); return; }
   if (d.action === 'retry') { boot(); return; }
+  if (['toggle-translation', 'font-up', 'font-down'].includes(d.action)) {
+    haptic('select');
+    if (d.action === 'toggle-translation') prayerPrefs.translation = !prayerPrefs.translation;
+    else prayerPrefs.size = Math.max(0, Math.min(2, prayerPrefs.size + (d.action === 'font-up' ? 1 : -1)));
+    storage.set(PRAYER_PREFS_KEY, JSON.stringify(prayerPrefs));
+    render({ keepScroll: true });
+    return;
+  }
   if (t.hasAttribute('data-link') && inTelegram) { // внешние ссылки — через Telegram, чтобы не закрывать приложение
     ev.preventDefault();
     openLink(t.href);
@@ -263,5 +292,11 @@ async function boot(deepLinked = false) {
   }
 }
 
-initTelegram({ onBack: () => (sheet.open ? closeSheet() : (location.hash = SUBPAGES[parseRoute().page] || 'home')) });
+// Кнопка «Назад» Telegram: закрыть шторку → из текста молитвы к списку → из подраздела во вкладку
+function goBack() {
+  if (sheet.open) return closeSheet();
+  const { page, arg } = parseRoute();
+  location.hash = page === 'prayers' && arg ? 'prayers' : SUBPAGES[page] || 'home';
+}
+initTelegram({ onBack: goBack });
 boot(applyStartParam());

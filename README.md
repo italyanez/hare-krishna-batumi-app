@@ -60,10 +60,18 @@ Telegram не показывал старую версию из кэша.
 - `newcomers` — вступление и частые вопросы для экрана «Новичкам».
 - `donations.methods[].tab/tabSub` — подписи вкладок «Из России / Из Грузии / Криптовалюта».
 
+## Молитвы
+
+Тексты лежат в `dist/prayers.json` (отдельно от расписания — загружаются только при открытии
+раздела). Для каждой молитвы: `id`, `title`, `subtitle`, `when` (когда поют), `source`,
+`verses` — список строф: `text` (строки транслитерации) и `translation`.
+У маха-мантры есть `commentary` — объяснение Шрилы Прабхупады.
+Тексты и переводы взяты с https://iskcone.com/ru/bhajans с разрешения.
+
 ## Ссылки на разделы
 
 `#home`, `#schedule`, `#donate`, `#donate/sber`, `#donate/tbc`, `#donate/usdt`,
-`#contact`, `#contact/service`, `#newcomers`, `#newcomers/address`, `#newcomers/faq`, `#records`.
+`#contact`, `#contact/service`, `#prayers`, `#prayers/gurvashtaka`, `#newcomers`, `#newcomers/address`, `#newcomers/faq`, `#records`.
 Старые адреса `#service` и `#temple` перенаправляются на новые.
 
 Когда будет настроена Main Mini App, ссылки вида
