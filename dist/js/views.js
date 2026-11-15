@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=25';
+import { icon } from './icons.js?v=26';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=25';
+} from './schedule.js?v=26';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -88,6 +88,9 @@ export function homeView(ctx) {
   const [next, ...rest] = active;
   const temple = contactById(ctx, 'temple');
   const { links, places, donations } = ctx.content;
+  // Накануне экадаши, в сам день и в утро выхода из поста карточка важнее расписания — поднимаем её
+  const ek = ctx.calendar && currentEkadashi(ctx.calendar, ctx.now);
+  const ekadashiUrgent = Boolean(ek) && daysBetween(ctx.now.date, ek.date) <= 1;
 
   return `
   <h1 class="sr-only">Храм Харе Кришна в Батуми</h1>
@@ -112,12 +115,14 @@ export function homeView(ctx) {
     <a class="quick-item" href="${esc(mapsUrl(places.temple.query))}" target="_blank" rel="noopener" data-link>${icon('pin')}<span>Как добраться</span></a>
   </nav>
 
+  ${ekadashiUrgent ? ekadashiCard(ctx) : ''}
+
   ${rest.length ? `<section class="section">
     ${sectionHead('Программы храма', '<a class="text-link" href="#schedule">Всё расписание</a>')}
     <div class="card card--flush event-list">${rest.slice(0, 4).map(e => eventRow(e, ctx, { showDate: true })).join('')}</div>
   </section>` : ''}
 
-  ${ekadashiCard(ctx)}
+  ${ekadashiUrgent ? '' : ekadashiCard(ctx)}
 
   <section class="section donate-strip card">
     <div>
