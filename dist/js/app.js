@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=15';
-import { nowInBatumi, relativeDay } from './schedule.js?v=15';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=15';
-import * as V from './views.js?v=15';
+import { icon } from './icons.js?v=16';
+import { nowInBatumi, relativeDay } from './schedule.js?v=16';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=16';
+import * as V from './views.js?v=16';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
@@ -56,7 +56,7 @@ async function loadContent() {
 // Молитвы загружаются только при первом открытии раздела, чтобы не замедлять главную
 let prayersLoading = null;
 function loadPrayers() {
-  prayersLoading ||= fetch('prayers.json?v=15', { cache: 'no-cache' })
+  prayersLoading ||= fetch('prayers.json?v=16', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.prayers = data; render({ keepScroll: true }); })
     .catch(() => { prayersLoading = null; main.innerHTML = V.errorView('https://iskcone.com/ru/bhajans'); });
@@ -91,6 +91,7 @@ function render({ keepScroll = false } = {}) {
       return arg ? V.prayerView(state.prayers, arg, prayerPrefs) : V.prayersView(state.prayers);
     },
   };
+  document.body.dataset.page = page; // логотип в шапке показываем только на главной
   main.innerHTML = views[page]();
   renderNav(SUBPAGES[page] || page);
   document.title = `${TITLES[page]} · Харе Кришна Батуми`;

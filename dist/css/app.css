@@ -91,6 +91,10 @@ main {
   display: flex; flex-direction: column; gap: var(--space-5);
 }
 main:focus { outline: none; }
+/* Логотип и название — только на главной. На остальных страницах заголовок раздела
+   и так говорит, где человек, а Telegram показывает название бота в своей шапке. */
+body:not([data-page='home']) .topbar { display: none; }
+body:not([data-page='home']) main { padding-top: calc(var(--space-4) + var(--tg-content-safe-area-inset-top, 0px)); }
 
 .tabbar {
   position: fixed; inset: auto 0 0; z-index: 20;
@@ -519,6 +523,7 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
   .page { margin-left: 248px; }
   .topbar { justify-content: flex-end; padding-top: var(--space-6); }
   main { padding-bottom: var(--space-10); gap: var(--space-6); }
+  body:not([data-page='home']) main { padding-top: var(--space-8); }
   .toast { bottom: 24px; }
   .event:hover, .row:hover, .link-card:hover, .method-link:hover { background: var(--surface-2); }
   .button--secondary:hover { border-color: var(--muted); }
