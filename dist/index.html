@@ -12,13 +12,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
-  <link rel="stylesheet" href="css/app.css?v=29" id="app-css">
+  <link rel="stylesheet" href="css/app.css?v=31" id="app-css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
     // Telegram держит эту страницу в памяти и подставляет скрипты прошлой версии,
     // а данные (content.json) грузятся свежие — получается смесь старого кода и новых данных.
     // Поэтому номер версии берём из сети мимо кэша и загружаем стили и код именно этой версии.
-    let v = '29';
+    let v = '31';
     try { v = String((await (await fetch('version.json', { cache: 'no-store' })).json()).v); } catch { /* офлайн — берём встроенную */ }
     const css = document.getElementById('app-css');
     if (!css.href.endsWith(`v=${v}`)) css.href = `css/app.css?v=${v}`;

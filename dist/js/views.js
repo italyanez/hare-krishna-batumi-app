@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=29';
+import { icon } from './icons.js?v=31';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=29';
+} from './schedule.js?v=31';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -302,7 +302,7 @@ export const requisitesText = m => [
 export function donateView(ctx, methodId) {
   const d = ctx.content.donations;
   const m = d.methods.find(x => x.id === methodId) || d.methods[0];
-  const helper = contactById(ctx, 'temple');
+  const helper = contactById(ctx, 'donations');
   return `
   ${pageHead('Поддержать храм', 'Храм в Батуми содержится на пожертвования прихожан. Откуда вам удобнее перевести?')}
 
@@ -328,7 +328,11 @@ export function donateView(ctx, methodId) {
 
   <section class="card after">
     <h2>После перевода</h2>
-    <p class="muted">Спасибо! Переводы не отслеживаются автоматически. Если хотите, чтобы пожертвование учли на конкретную цель, или что-то не получилось — напишите в храм.</p>
+    <p class="muted">Спасибо! Переводы не отслеживаются автоматически. Если хотите, чтобы пожертвование учли на конкретную цель, или что-то не получилось — напишите ответственному.</p>
+    <div class="person person--compact">
+      ${avatar(helper, 'sm')}
+      <div><b>${esc(helper.name)}</b><span>@${esc(helper.handle)} · ${esc(helper.role)}</span></div>
+    </div>
     ${ext(tme(helper.handle), `${icon('send')}Написать @${esc(helper.handle)}`, 'button button--secondary button--block')}
   </section>
 

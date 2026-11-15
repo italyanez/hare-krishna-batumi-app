@@ -393,6 +393,8 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 .person { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-3); align-items: center; padding: var(--space-3); border-radius: 14px; background: var(--surface-2); }
 .person small { display: block; font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .person b { display: block; font-size: var(--fs-lg); line-height: 1.25; }
+.person--compact { grid-template-columns: 36px 1fr; padding: 0; background: none; }
+.person--compact b { font-size: var(--fs-md); }
 .person > div > span { display: block; font-size: var(--fs-sm); color: var(--muted); }
 
 /* Новичкам */
