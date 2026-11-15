@@ -26,6 +26,7 @@ const paths = {
   report: '<path d="M6 3.5h8l4 4V20a.5.5 0 0 1-.5.5h-11A.5.5 0 0 1 6 20z"/><path d="M14 3.5V8h4M9 17v-3m3 3v-5m3 5v-2"/>',
   bank: '<path d="m3.5 9 8.5-5 8.5 5M5 9.5v8m4.7-8v8m4.6-8v8M19 9.5v8M3.5 20.5h17"/>',
   coin: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 8h7M12 8v8.5M8 11.5c1 .6 2.4 1 4 1s3-.4 4-1"/>',
+  moon: '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
   phone: '<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/>',
 };
 

@@ -68,10 +68,27 @@ Telegram не показывал старую версию из кэша.
 У маха-мантры есть `commentary` — объяснение Шрилы Прабхупады.
 Тексты и переводы взяты с https://iskcone.com/ru/bhajans (с разрешения) и Vedabase (Гаура-арати, © BBT). Поле `intro` — вступление, `copyright` — правообладатель.
 
+## Вайшнавский календарь
+
+`dist/calendar.json` — экадаши (с временем выхода из поста), праздники и дни ачарьев
+с ноября 2026 по декабрь 2027. Источник — официальный календарь ИСККОН (GCal 11) с
+vaisnavacalendar.info для Тбилиси: даты совпадают, а время, привязанное к восходу и к
+трети светового дня, пересчитано для Батуми (≈ на 12–13 минут позже). Время, привязанное
+к концу двадаши, не меняется.
+
+Чтобы продлить календарь на следующий год (скрипты — `tools/calendar/`):
+1. Скачать с https://www.vaisnavacalendar.info/calendar-file-downloads/text-file-calendars
+   файлы `Tbilisi [Georgia].txt` за нужные годы и сохранить как `tbilisi-ГГГГ.txt`.
+2. В `parse.py` перечислить эти файлы, в `build.py` поменять `FROM`/`TO`.
+3. `python3 parse.py`, затем `python3 build.py <папка со скриптами> dist/calendar.json`.
+   Скрипт выведет праздники без русского перевода — добавьте их в `ru.py`.
+
+Напоминания об экадаши присылает бот https://t.me/HappyEkadash_bot.
+
 ## Ссылки на разделы
 
 `#home`, `#schedule`, `#donate`, `#donate/sber`, `#donate/tbc`, `#donate/usdt`,
-`#contact`, `#contact/service`, `#prayers`, `#prayers/gurvashtaka`, `#newcomers`, `#newcomers/address`, `#newcomers/faq`, `#records`.
+`#contact`, `#contact/service`, `#prayers`, `#prayers/gurvashtaka`, `#calendar`, `#newcomers`, `#newcomers/address`, `#newcomers/faq`, `#records`.
 Старые адреса `#service` и `#temple` перенаправляются на новые.
 
 Когда будет настроена Main Mini App, ссылки вида

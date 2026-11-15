@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=22';
+import { icon } from './icons.js?v=24';
 import {
-  STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
+  STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=22';
+} from './schedule.js?v=24';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -112,6 +112,8 @@ export function homeView(ctx) {
     <a class="quick-item" href="${esc(mapsUrl(places.temple.query))}" target="_blank" rel="noopener" data-link>${icon('pin')}<span>Как добраться</span></a>
   </nav>
 
+  ${ekadashiCard(ctx)}
+
   ${rest.length ? `<section class="section">
     ${sectionHead('Дальше', '<a class="text-link" href="#schedule">Всё расписание</a>')}
     <div class="card card--flush event-list">${rest.slice(0, 4).map(e => eventRow(e, ctx, { showDate: true })).join('')}</div>
@@ -181,6 +183,7 @@ export function scheduleView(ctx, filter) {
 
   return `
   ${pageHead('Расписание', 'Ближайшие две недели. Время — по Батуми.', freshness(ctx))}
+  ${calendarLink(ctx)}
   <div class="chips" role="group" aria-label="Тип программы">
     <button class="filter" type="button" data-filter="" aria-pressed="${!filter}">Все</button>
     ${present.map(c => `<button class="filter" type="button" data-filter="${c}" aria-pressed="${filter === c}">${esc(cats[c])}</button>`).join('')}
@@ -366,6 +369,7 @@ export function contactView(ctx) {
     ${sectionHead('Материалы и новости')}
     <div class="card card--flush rows">
       <a class="row" href="#prayers">${icon('book')}<span><b>Молитвы</b><small>Тексты и переводы для программ</small></span>${icon('chevron')}</a>
+      <a class="row" href="#calendar">${icon('moon')}<span><b>Вайшнавский календарь</b><small>Экадаши и праздники для Батуми</small></span>${icon('chevron')}</a>
       ${row(links.channel, 'megaphone', 'Канал храма', 'Анонсы, переносы, трансляции, отчёты')}
       ${row(links.chat, 'chat', 'Чат сообщества', 'Общение с преданными')}
       <a class="row" href="#records">${icon('play')}<span><b>Лекции и трансляции</b><small>Прямые эфиры идут в канале</small></span>${icon('chevron')}</a>
@@ -468,6 +472,110 @@ export function recordsView(ctx) {
         <p class="muted">Когда лекции храма начнут публиковаться на YouTube, они появятся здесь. Нужны люди, которые помогут записывать.</p>
         <button class="text-link" type="button" data-service="recording">${icon('hands')}Помочь с записью</button>
       </section>`}`;
+}
+
+/* ---------- Вайшнавский календарь ---------- */
+
+const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const plural = (n, one, few, many) => (n % 10 === 1 && n % 100 !== 11 ? one : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? few : many);
+const dayLabel = (iso, cap = true) => { const s = `${formatWeekdayShort(iso)}, ${formatDayMonth(iso)}`; return cap ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
+const paranaRange = p => (p.to ? `${p.from}–${p.to}` : `после ${p.from}`);
+
+/** Экадаши, о котором сейчас важно знать: ближайший, или сегодняшний выход из поста, пока окно не закрылось. */
+function currentEkadashi(cal, now) {
+  return cal.events.find(e => e.kind === 'ekadashi' && (e.date >= now.date
+    || (e.parana?.date === now.date && now.minutes < toMinutes(e.parana.to || e.parana.from) + 1)));
+}
+const upcomingCal = (cal, now) => cal.events.filter(e => e.date >= now.date || e === currentEkadashi(cal, now));
+
+function ekadashiHeadline(e, now) {
+  const diff = daysBetween(now.date, e.date);
+  if (diff < 0) return 'Сегодня выход из поста';
+  if (diff === 0) return 'Сегодня экадаши';
+  if (diff === 1) return 'Завтра экадаши';
+  return `Экадаши через ${diff} ${plural(diff, 'день', 'дня', 'дней')}`;
+}
+
+function ekadashiCard(ctx) {
+  const cal = ctx.calendar;
+  const e = cal && currentEkadashi(cal, ctx.now);
+  if (!e) return '';
+  const fest = cal.events.find(x => x.kind === 'major' && x.date >= ctx.now.date && daysBetween(ctx.now.date, x.date) <= 45);
+  return `<section class="card ekadashi">
+    <div class="ekadashi-head">
+      <span class="ekadashi-icon">${icon('moon')}</span>
+      <div>
+        <p class="overline">${esc(ekadashiHeadline(e, ctx.now))}</p>
+        <h2>${esc(e.title)}</h2>
+        <p class="muted">${esc(dayLabel(e.date))}</p>
+      </div>
+    </div>
+    ${e.parana ? `<p class="ekadashi-parana">${icon('clock')}<span>Выход из поста: <b>${esc(dayLabel(e.parana.date, false))}, <span class="nowrap">${esc(paranaRange(e.parana))}</span></b></span></p>` : ''}
+    <div class="next-actions">
+      ${ext(cal.reminderBot, `${icon('send')}Напоминать`, 'button button--primary')}
+      <a class="button button--secondary" href="#calendar">Календарь</a>
+    </div>
+    ${fest ? `<a class="ekadashi-fest" href="#calendar">${icon('star')}<span>${esc(dayLabel(fest.date))} — ${esc(fest.title)}</span></a>` : ''}
+  </section>`;
+}
+
+function calendarLink(ctx) {
+  const e = ctx.calendar && currentEkadashi(ctx.calendar, ctx.now);
+  return `<a class="card link-card" href="#calendar">${icon('moon')}
+    <span><b>Вайшнавский календарь</b><small>${e ? `${esc(ekadashiHeadline(e, ctx.now))} · ${esc(dayLabel(e.date))}` : 'Экадаши и праздники для Батуми'}</small></span>${icon('chevron')}</a>`;
+}
+
+const CAL_FILTERS = [['', 'Все'], ['ekadashi', 'Экадаши'], ['holidays', 'Праздники'], ['acharya', 'Дни ачарьев']];
+const calMatch = (e, f) => !f || (f === 'holidays' ? ['major', 'festival'].includes(e.kind) : e.kind === f);
+
+function calItem(e) {
+  const fast = e.fast ? `<small class="cal-fast">${esc(e.fast)}</small>` : '';
+  if (e.kind === 'ekadashi') {
+    return `<div class="cal-item cal-item--ekadashi">${icon('moon')}<div><b>${esc(e.title)}</b>
+      ${e.parana ? `<small>Выход из поста: ${esc(dayLabel(e.parana.date, false))}, <span class="nowrap">${esc(paranaRange(e.parana))}</span></small>` : ''}
+      ${e.note ? `<small>${esc(e.note)}</small>` : ''}</div></div>`;
+  }
+  const ic = { major: 'star', festival: 'calendar', acharya: 'user' }[e.kind];
+  return `<div class="cal-item cal-item--${e.kind}">${icon(ic)}<div><span>${esc(e.title)}</span>${fast}</div></div>`;
+}
+
+export function calendarView(ctx, filter) {
+  const cal = ctx.calendar;
+  const list = upcomingCal(cal, ctx.now).filter(e => calMatch(e, filter));
+  const months = new Map();
+  for (const e of list) {
+    const key = e.date.slice(0, 7);
+    const days = months.get(key) || new Map();
+    days.set(e.date, [...(days.get(e.date) || []), e]);
+    months.set(key, days);
+  }
+  return `
+  <a class="back-link" href="#schedule">${icon('chevron')}Расписание</a>
+  ${pageHead('Вайшнавский календарь', 'Экадаши, праздники и дни ачарьев. Время — по Батуми.')}
+
+  <aside class="callout callout--moon">
+    ${icon('moon')}
+    <div><b>Напоминания об экадаши</b>
+      <p>Бот @HappyEkadash_bot пришлёт напоминание накануне поста — по восходу солнца в вашем городе.</p>
+      ${ext(cal.reminderBot, `${icon('send')}Включить напоминания`, 'button button--primary')}
+    </div>
+  </aside>
+
+  <div class="chips" role="group" aria-label="Что показывать">
+    ${CAL_FILTERS.map(([v, l]) => `<button class="filter" type="button" data-cal-filter="${v}" aria-pressed="${(filter || '') === v}">${l}</button>`).join('')}
+  </div>
+
+  ${[...months].map(([key, days]) => `<section class="section">
+    <h2 class="month-title">${MONTHS[Number(key.slice(5)) - 1]} ${key.slice(0, 4)}</h2>
+    <div class="card card--flush cal-list">
+      ${[...days].map(([date, items]) => `<div class="cal-day ${date === ctx.now.date ? 'is-today' : ''}">
+        <span class="cal-date"><b>${dayNumber(date)}</b>${esc(formatWeekdayShort(date))}</span>
+        <div class="cal-items">${items.map(calItem).join('')}</div>
+      </div>`).join('')}
+    </div>
+  </section>`).join('') || '<p class="muted">Ничего не найдено.</p>'}
+
+  <p class="footnote">${esc(cal.source)}. Источник: <a href="${esc(cal.sourceUrl)}" target="_blank" rel="noopener" data-link>vaisnavacalendar.info</a>. Календарь рассчитан до конца 2027 года.</p>`;
 }
 
 /* ---------- Молитвы ---------- */

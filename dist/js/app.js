@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=22';
-import { nowInBatumi, relativeDay } from './schedule.js?v=22';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=22';
-import * as V from './views.js?v=22';
+import { icon } from './icons.js?v=24';
+import { nowInBatumi, relativeDay } from './schedule.js?v=24';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=24';
+import * as V from './views.js?v=24';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
@@ -17,8 +17,8 @@ const TABS = [
   ['contact', 'chat', 'Связаться'],
   ['newcomers', 'temple', 'Новичкам'],
 ];
-const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', contact: 'Связаться', newcomers: 'Впервые в храме', records: 'Лекции и трансляции', prayers: 'Молитвы' };
-const SUBPAGES = { records: 'contact', prayers: 'contact' }; // подстраница → активная вкладка
+const TITLES = { home: 'Главная', schedule: 'Расписание', donate: 'Поддержать храм', contact: 'Связаться', newcomers: 'Впервые в храме', records: 'Лекции и трансляции', prayers: 'Молитвы', calendar: 'Вайшнавский календарь' };
+const SUBPAGES = { records: 'contact', prayers: 'contact', calendar: 'schedule' }; // подстраница → активная вкладка
 const ALIASES = { service: 'contact/service', temple: 'newcomers' }; // адреса прошлой версии
 
 const storage = {
@@ -26,7 +26,7 @@ const storage = {
   set(key, value) { try { localStorage.setItem(key, value); } catch { /* приватный режим — не критично */ } },
 };
 
-const state = { content: null, prayers: null, filter: '', lastRoute: '' };
+const state = { content: null, prayers: null, calendar: null, filter: '', calFilter: '', lastRoute: '' };
 
 // Настройки чтения молитв: показывать перевод, размер шрифта 0–2. Хранятся на устройстве.
 const prayerPrefs = (() => {
@@ -56,14 +56,24 @@ async function loadContent() {
 // Молитвы загружаются только при первом открытии раздела, чтобы не замедлять главную
 let prayersLoading = null;
 function loadPrayers() {
-  prayersLoading ||= fetch('prayers.json?v=22', { cache: 'no-cache' })
+  prayersLoading ||= fetch('prayers.json?v=24', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.prayers = data; render({ keepScroll: true }); })
     .catch(() => { prayersLoading = null; main.innerHTML = V.errorView('https://iskcone.com/ru/bhajans'); });
   return prayersLoading;
 }
 
-const ctx = () => ({ content: state.content, now: nowInBatumi() });
+// Календарь подгружается в фоне: главная показывается сразу, карточка экадаши появляется, когда данные пришли
+let calendarLoading = null;
+function loadCalendar() {
+  calendarLoading ||= fetch('calendar.json?v=24', { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { state.calendar = data; render({ keepScroll: true }); })
+    .catch(() => { calendarLoading = null; });
+  return calendarLoading;
+}
+
+const ctx = () => ({ content: state.content, calendar: state.calendar, now: nowInBatumi() });
 
 /* ---------- Маршрутизация ---------- */
 
@@ -86,6 +96,10 @@ function render({ keepScroll = false } = {}) {
     contact: () => V.contactView(c),
     newcomers: () => V.newcomersView(c),
     records: () => V.recordsView(c),
+    calendar: () => {
+      if (!state.calendar) { loadCalendar(); return '<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Загружаем календарь…</span></div>'; }
+      return V.calendarView(c, state.calFilter);
+    },
     prayers: () => {
       if (!state.prayers) { loadPrayers(); return '<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Загружаем молитвы…</span></div>'; }
       return arg ? V.prayerView(state.prayers, arg, prayerPrefs) : V.prayersView(state.prayers);
@@ -212,11 +226,12 @@ function shareRequisites(id) {
 }
 
 document.addEventListener('click', async ev => {
-  const t = ev.target.closest('[data-event],[data-filter],[data-method],[data-copy],[data-service],[data-share],[data-share-requisites],[data-action],[data-link]');
+  const t = ev.target.closest('[data-event],[data-filter],[data-cal-filter],[data-method],[data-copy],[data-service],[data-share],[data-share-requisites],[data-action],[data-link]');
   if (!t) return;
   const d = t.dataset;
 
   if (d.event) { haptic('select'); openSheet(V.eventSheet(ctx(), V.findEvent(ctx(), d.event))); return; }
+  if (d.calFilter !== undefined) { haptic('select'); state.calFilter = d.calFilter; render({ keepScroll: true }); return; }
   if (d.filter !== undefined && t.classList.contains('filter')) { haptic('select'); state.filter = d.filter; render({ keepScroll: true }); return; }
   if (d.method) {
     haptic('select');
@@ -285,6 +300,7 @@ async function boot(deepLinked = false) {
   main.innerHTML = '<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Загружаем расписание…</span></div>';
   try {
     state.content = await loadContent();
+    loadCalendar();
     render();
     maybeWelcome(deepLinked);
   } catch {
