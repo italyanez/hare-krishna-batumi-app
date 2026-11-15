@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=24';
+import { icon } from './icons.js?v=25';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=24';
+} from './schedule.js?v=25';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -112,12 +112,12 @@ export function homeView(ctx) {
     <a class="quick-item" href="${esc(mapsUrl(places.temple.query))}" target="_blank" rel="noopener" data-link>${icon('pin')}<span>Как добраться</span></a>
   </nav>
 
-  ${ekadashiCard(ctx)}
-
   ${rest.length ? `<section class="section">
-    ${sectionHead('Дальше', '<a class="text-link" href="#schedule">Всё расписание</a>')}
+    ${sectionHead('Программы храма', '<a class="text-link" href="#schedule">Всё расписание</a>')}
     <div class="card card--flush event-list">${rest.slice(0, 4).map(e => eventRow(e, ctx, { showDate: true })).join('')}</div>
   </section>` : ''}
+
+  ${ekadashiCard(ctx)}
 
   <section class="section donate-strip card">
     <div>
@@ -183,7 +183,6 @@ export function scheduleView(ctx, filter) {
 
   return `
   ${pageHead('Расписание', 'Ближайшие две недели. Время — по Батуми.', freshness(ctx))}
-  ${calendarLink(ctx)}
   <div class="chips" role="group" aria-label="Тип программы">
     <button class="filter" type="button" data-filter="" aria-pressed="${!filter}">Все</button>
     ${present.map(c => `<button class="filter" type="button" data-filter="${c}" aria-pressed="${filter === c}">${esc(cats[c])}</button>`).join('')}
@@ -194,6 +193,8 @@ export function scheduleView(ctx, filter) {
       <h2 class="day-title">${esc(relativeDay(day, ctx.now.date))}</h2>
       <div class="card card--flush event-list">${items.map(e => eventRow(e, ctx)).join('')}</div>
     </section>`).join('') : '<p class="muted">В этой категории ближайших программ нет.</p>'}
+
+  ${calendarLink(ctx)}
 
   <section class="section">
     ${sectionHead('Что значат отметки')}
