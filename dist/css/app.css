@@ -409,6 +409,8 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 .verse { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
 .verse-num { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
   background: var(--warm-soft); color: var(--warm); font-size: 12px; font-weight: 800; }
+.verse-head { display: flex; align-items: center; gap: var(--space-2); }
+.verse-label { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--warm); }
 .verse-text { font-size: var(--verse); line-height: 1.45; font-weight: 600; font-style: italic; color: var(--ink); }
 .verse-line { display: block; padding-left: 1.2em; text-indent: -1.2em; }
 .verse-translation { margin-top: var(--space-1); padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--tr); line-height: 1.6; color: var(--muted); }

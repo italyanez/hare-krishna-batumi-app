@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=17';
+import { icon } from './icons.js?v=18';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=17';
+} from './schedule.js?v=18';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -512,7 +512,7 @@ export function prayerView(data, id, prefs) {
   <article class="prayer size-${prefs.size} ${prefs.translation ? '' : 'no-translation'}">
     ${p.verses.map((v, n) => `
       <section class="verse">
-        ${p.verses.length > 1 ? `<span class="verse-num">${n + 1}</span>` : ''}
+        ${p.verses.length > 1 || v.label ? `<span class="verse-head">${p.verses.length > 1 ? `<span class="verse-num">${n + 1}</span>` : ''}${v.label ? `<span class="verse-label">${esc(v.label)}</span>` : ''}</span>` : ''}
         <p class="verse-text">${(Array.isArray(v.text) ? v.text : [v.text]).flat().map(l => `<span class="verse-line">${esc(l)}</span>`).join('')}</p>
         ${v.translation ? `<p class="verse-translation">${esc(v.translation)}</p>` : ''}
       </section>`).join('')}

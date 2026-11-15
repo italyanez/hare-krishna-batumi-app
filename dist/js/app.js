@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=17';
-import { nowInBatumi, relativeDay } from './schedule.js?v=17';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=17';
-import * as V from './views.js?v=17';
+import { icon } from './icons.js?v=18';
+import { nowInBatumi, relativeDay } from './schedule.js?v=18';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=18';
+import * as V from './views.js?v=18';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
@@ -56,7 +56,7 @@ async function loadContent() {
 // Молитвы загружаются только при первом открытии раздела, чтобы не замедлять главную
 let prayersLoading = null;
 function loadPrayers() {
-  prayersLoading ||= fetch('prayers.json?v=17', { cache: 'no-cache' })
+  prayersLoading ||= fetch('prayers.json?v=18', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.prayers = data; render({ keepScroll: true }); })
     .catch(() => { prayersLoading = null; main.innerHTML = V.errorView('https://iskcone.com/ru/bhajans'); });
