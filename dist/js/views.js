@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=21';
+import { icon } from './icons.js?v=22';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=21';
+} from './schedule.js?v=22';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -492,7 +492,7 @@ export function prayersView(data) {
         <span><b>${esc(p.title)}</b><small>${esc(p.subtitle)}${p.verses.length > 1 ? ` · ${verseCount(p.verses.length)}` : ''}</small></span>${icon('chevron')}</a>`).join('')}
     </div>
   </section>`).join('')}
-  <p class="footnote">Тексты и переводы — с сайтов <a href="${esc(data.source)}" target="_blank" rel="noopener" data-link>ISKCON One Love</a> и Vedabase. На ISKCON One Love — другие бхаджаны и аудиозаписи.</p>`;
+  <p class="footnote">Тексты и переводы — с сайтов <a href="${esc(data.source)}" target="_blank" rel="noopener" data-link>ISKCON One Love</a>, Vedabase и Gitabase. На ISKCON One Love — другие бхаджаны и аудиозаписи.</p>`;
 }
 
 export function prayerView(data, id, prefs) {
