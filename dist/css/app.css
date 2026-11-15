@@ -416,6 +416,8 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 .verse-translation { margin-top: var(--space-1); padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--tr); line-height: 1.6; color: var(--muted); }
 .prayer.no-translation .verse-translation { display: none; }
 .commentary-title { font-weight: 800; }
+.prayer-note { padding-block: var(--space-3); }
+.prayer-note + .prayer-note { margin-top: calc(var(--space-5) * -1 + var(--space-2)); }
 .commentary { display: grid; gap: var(--space-3); margin-top: var(--space-3); color: var(--muted); font-size: var(--fs-sm); line-height: 1.6; }
 .prayer-nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .prayer-nav-link { display: grid; gap: 2px; padding: var(--space-3) var(--space-4); }

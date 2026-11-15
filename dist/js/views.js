@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=19';
+import { icon } from './icons.js?v=20';
 import {
   STATUS, addDays, buildEvents, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=19';
+} from './schedule.js?v=20';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -500,6 +500,11 @@ export function prayerView(data, id, prefs) {
     ${p.when ? `<p class="prayer-when">${icon('clock')}${esc(p.when)}</p>` : ''}
     ${p.intro ? `<p class="prayer-intro">${esc(p.intro)}</p>` : ''}
   </header>
+
+  ${(p.notes || []).map(n => `<details class="disclosure card prayer-note">
+    <summary><span class="commentary-title">${esc(n.title)}</span>${icon('chevron', 'disclosure-icon')}</summary>
+    <div class="commentary">${n.paragraphs.map(t => `<p>${esc(t)}</p>`).join('')}</div>
+  </details>`).join('')}
 
   <div class="reader-tools" role="group" aria-label="Настройки чтения">
     ${hasTranslation ? `<button class="filter" type="button" data-action="toggle-translation" aria-pressed="${prefs.translation}">Перевод</button>` : ''}
