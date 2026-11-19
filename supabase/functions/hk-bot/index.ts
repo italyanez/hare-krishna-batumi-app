@@ -52,12 +52,19 @@ async function tg(method: string, body: Record<string, unknown>) {
   return await r.json();
 }
 
-async function tgPhoto(chatId: string | number, png: Uint8Array, caption: string) {
+// Кнопки под постами в канале: открыть мини-приложение (главное приложение бота) и подписаться на напоминания
+const POST_KB = { inline_keyboard: [[
+  { text: "📅 Расписание", url: `${BOT_LINK}?startapp=schedule` },
+  { text: "🔔 Напоминать мне", url: `${BOT_LINK}?start=remind` },
+]] };
+
+async function tgPhoto(chatId: string | number, png: Uint8Array, caption: string, kb?: unknown) {
   const fd = new FormData();
   fd.append("chat_id", String(chatId));
   fd.append("photo", new Blob([png as BlobPart], { type: "image/png" }), "afisha.png");
   fd.append("caption", caption);
   fd.append("parse_mode", "HTML");
+  if (kb) fd.append("reply_markup", JSON.stringify(kb));
   const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: "POST", body: fd });
   return await r.json();
 }
@@ -108,14 +115,14 @@ async function channelPost(png: Uint8Array | null, text: string): Promise<Sent> 
   if (!(await isLive())) {
     for (const a of await admins()) {
       await say(a.chat_id, "🧪 <b>Тестовый режим</b> — в канал это не ушло. Так будет выглядеть пост:").catch(() => {});
-      if (png) await tgPhoto(a.chat_id, png, text).catch(() => {});
-      else await say(a.chat_id, text).catch(() => {});
+      if (png) await tgPhoto(a.chat_id, png, text, POST_KB).catch(() => {});
+      else await say(a.chat_id, text, POST_KB).catch(() => {});
     }
     return { ok: true, message_id: null, test: true };
   }
   const r = png
-    ? await tgPhoto(CHANNEL, png, text)
-    : await tg("sendMessage", { chat_id: CHANNEL, text, parse_mode: "HTML", disable_web_page_preview: true });
+    ? await tgPhoto(CHANNEL, png, text, POST_KB)
+    : await tg("sendMessage", { chat_id: CHANNEL, text, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: POST_KB });
   return r.ok ? { ok: true, message_id: r.result.message_id } : { ok: false, message_id: null, description: r.description };
 }
 const postLink = (id: number | null) => (id ? `https://t.me/${CHANNEL.slice(1)}/${id}` : null);
@@ -181,8 +188,7 @@ export function caption(sunday: Date, w: Week | null) {
   ];
   if (w?.note) lines.push("", `✨ ${esc(w.note)}`);
   for (const b of blocksOf(w).filter((b) => !b.off)) lines.push("", blockLine(b, w?.lecturer ?? null));
-  lines.push("", `📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>`, "В расписании возможны небольшие изменения.",
-    `🔔 <a href="${BOT_LINK}?start=remind">Напомнить мне за 2 часа</a>`);
+  lines.push("", `📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>`, "В расписании возможны небольшие изменения.");
   return lines.join("\n");
 }
 
@@ -447,8 +453,7 @@ function weekdayCaption(key: string, d: Day | null) {
   const lines = ["🙏 Харе Кришна, дорогие друзья!", "", `Сегодня, ${WD_IN[date.getUTCDay()]} ${human(date)}, ждём вас в храме! 🌸`];
   if (d?.note) lines.push("", `✨ ${esc(d.note)}`);
   for (const b of weekdayBlocks(d)) lines.push("", blockLine(b, null));
-  lines.push("", `📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>`,
-    `🔔 <a href="${BOT_LINK}?start=remind">Напомнить мне за 2 часа</a>`);
+  lines.push("", `📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>`);
   return lines.join("\n");
 }
 function weekdayPoster(key: string, d: Day | null): Poster {
@@ -876,10 +881,11 @@ async function editPublished(sunday: Date) {
   fd.append("message_id", String(w.message_id));
   fd.append("media", JSON.stringify({ type: "photo", media: "attach://img", caption: caption(sunday, w), parse_mode: "HTML" }));
   fd.append("img", new Blob([png as BlobPart], { type: "image/png" }), "afisha.png");
+  fd.append("reply_markup", JSON.stringify(POST_KB));
   const r = await (await fetch(`https://api.telegram.org/bot${TOKEN}/editMessageMedia`, { method: "POST", body: fd })).json();
   if (r.ok || String(r.description).includes("not modified")) return;
   // пост мог выйти текстом без афиши — тогда правим текст
-  const t = await tg("editMessageText", { chat_id: CHANNEL, message_id: w.message_id, text: caption(sunday, w), parse_mode: "HTML", disable_web_page_preview: true });
+  const t = await tg("editMessageText", { chat_id: CHANNEL, message_id: w.message_id, text: caption(sunday, w), parse_mode: "HTML", disable_web_page_preview: true, reply_markup: POST_KB });
   if (!t.ok && !String(t.description).includes("not modified")) throw new Error(r.description ?? "не удалось изменить пост");
 }
 
