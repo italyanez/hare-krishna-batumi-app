@@ -1,8 +1,8 @@
 // Точка входа: загрузка данных, маршрутизация по hash, шторки, копирование, Telegram.
-import { icon } from './icons.js?v=31';
-import { nowInBatumi, relativeDay } from './schedule.js?v=31';
-import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=31';
-import * as V from './views.js?v=31';
+import { icon } from './icons.js?v=32';
+import { nowInBatumi, relativeDay } from './schedule.js?v=32';
+import { initTelegram, setBackButton, startParam, openLink, haptic, inTelegram } from './telegram.js?v=32';
+import * as V from './views.js?v=32';
 
 const CONTENT_URL = 'content.json';
 const CACHE_KEY = 'hkb-content-v3';
@@ -56,7 +56,7 @@ async function loadContent() {
 // Молитвы загружаются только при первом открытии раздела, чтобы не замедлять главную
 let prayersLoading = null;
 function loadPrayers() {
-  prayersLoading ||= fetch('prayers.json?v=31', { cache: 'no-cache' })
+  prayersLoading ||= fetch('prayers.json?v=32', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.prayers = data; render({ keepScroll: true }); })
     .catch(() => { prayersLoading = null; main.innerHTML = V.errorView('https://iskcone.com/ru/bhajans'); });
@@ -66,11 +66,39 @@ function loadPrayers() {
 // Календарь подгружается в фоне: главная показывается сразу, карточка экадаши появляется, когда данные пришли
 let calendarLoading = null;
 function loadCalendar() {
-  calendarLoading ||= fetch('calendar.json?v=31', { cache: 'no-cache' })
+  calendarLoading ||= fetch('calendar.json?v=32', { cache: 'no-cache' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(data => { state.calendar = data; render({ keepScroll: true }); })
     .catch(() => { calendarLoading = null; });
   return calendarLoading;
+}
+
+// Расписание из бота: отмены, переносы, джапа и лектор, которые админы вводят в боте.
+// Пока бот в тестовом режиме (live=false) или недоступен — работаем по content.json.
+const BOT_SCHEDULE_URL = 'https://tchdzogbbfxicughxxju.supabase.co/functions/v1/hk-bot?task=schedule';
+function loadBotSchedule() {
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), 6000);
+  fetch(BOT_SCHEDULE_URL, { signal: ctrl.signal })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => { if (data?.live && Array.isArray(data.items)) { applyBotSchedule(state.content, data.items); render({ keepScroll: true }); } })
+    .catch(() => { /* остаётся расписание из content.json */ });
+}
+function applyBotSchedule(content, items) {
+  const regular = Object.fromEntries(content.regular.map(r => [r.id, r]));
+  const fromBot = new Set(items.map(i => `${i.id}|${i.date}`));
+  const events = content.events.filter(e => !e.fromBot && !fromBot.has(`${e.series}|${e.date}`));
+  for (const i of items) {
+    const r = regular[i.id] || {};
+    events.push({
+      ...r, id: `${i.id}-${i.date}`, series: i.id, date: i.date, title: i.title, start: i.start, end: i.end,
+      program: i.program, guest: i.lecturer || undefined,
+      note: i.cancelled ? (i.note || 'Программа не состоится.') : (i.note || r.note),
+      status: i.cancelled ? 'cancelled' : i.confirmed ? 'confirmed' : 'regular',
+      generated: !i.cancelled && !i.confirmed, sources: [], fromBot: true,
+    });
+  }
+  content.events = events;
 }
 
 const ctx = () => ({ content: state.content, calendar: state.calendar, now: nowInBatumi() });
@@ -301,6 +329,7 @@ async function boot(deepLinked = false) {
   try {
     state.content = await loadContent();
     loadCalendar();
+    loadBotSchedule();
     render();
     maybeWelcome(deepLinked);
   } catch {

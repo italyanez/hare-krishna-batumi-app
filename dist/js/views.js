@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=31';
+import { icon } from './icons.js?v=32';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=31';
+} from './schedule.js?v=32';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -206,6 +206,7 @@ export function scheduleView(ctx, filter) {
       <div class="card card--flush event-list">${items.map(e => eventRow(e, ctx)).join('')}</div>
     </section>`).join('') : '<p class="muted">В этой категории ближайших программ нет.</p>'}
 
+  ${remindLink(ctx)}
   ${calendarLink(ctx)}
 
   <section class="section">
@@ -542,6 +543,14 @@ function ekadashiCard(ctx) {
     </div>
     ${fest ? `<a class="ekadashi-fest" href="#calendar">${icon('star')}<span>${esc(dayLabel(fest.date))} — ${esc(fest.title)}</span></a>` : ''}
   </section>`;
+}
+
+// Личные напоминания за 2 часа до программы — через бота храма
+function remindLink(ctx) {
+  const bot = ctx.content.links.bot;
+  if (!bot) return '';
+  return `<a class="card link-card" href="${esc(bot)}?start=remind" target="_blank" rel="noopener" data-link>${icon('clock')}
+    <span><b>Напоминать о программах</b><small>Бот пришлёт сообщение за 2 часа до начала</small></span>${icon('chevron')}</a>`;
 }
 
 function calendarLink(ctx) {
