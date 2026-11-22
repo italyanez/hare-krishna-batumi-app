@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=32';
+import { icon } from './icons.js?v=34';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=32';
+} from './schedule.js?v=34';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -182,7 +182,7 @@ function notifyCard(ctx) {
   </aside>`;
 }
 
-const methodIcon = id => ({ sber: 'phone', tbc: 'bank', usdt: 'coin' })[id] || 'heart';
+const methodIcon = id => ({ tbank: 'phone', sber: 'phone', tbc: 'bank', usdt: 'coin' })[id] || 'heart';
 
 /* ---------- Расписание ---------- */
 
@@ -281,9 +281,9 @@ export function eventSheet(ctx, e) {
 const group4 = v => v.replace(/(.{4})/g, '$1 ').trim();
 
 function field(f) {
-  const shown = ['iban', 'address'].includes(f.format) ? group4(f.value) : f.value;
+  const shown = ['iban', 'address', 'card'].includes(f.format) ? group4(f.value) : f.value;
   const raw = f.copy || f.value;
-  const cls = [['iban', 'address'].includes(f.format) && 'is-mono', f.format === 'phone' && 'is-nowrap'].filter(Boolean).join(' ');
+  const cls = [['iban', 'address', 'card'].includes(f.format) && 'is-mono', ['phone', 'card'].includes(f.format) && 'is-nowrap'].filter(Boolean).join(' ');
   return `<div class="field">
     <span class="field-label">${esc(f.label)}</span>
     <button class="field-value ${cls}" type="button" data-copy="${esc(raw)}" data-copy-label="${esc(f.label)}">

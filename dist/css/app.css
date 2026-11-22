@@ -535,6 +535,11 @@ details[open] > summary .disclosure-icon { transform: rotate(-90deg); }
 .has-sheet .toast { bottom: calc(var(--safe-bottom) + 16px); }
 .noscript { padding: 24px; }
 
+/* Телефоны 360–420 px: у кнопки копирования остаётся только значок, чтобы номер не обрезался */
+@media (min-width: 360px) and (max-width: 420px) {
+  .field-value .copy-pill .copy-label,
+  .field-value.is-copied .copy-pill .copied-label { display: none; }
+}
 /* Узкие экраны (320 px) */
 @media (max-width: 359px) {
   :root { --gutter: 12px; --fs-2xl: 26px; --fs-xl: 23px; }
