@@ -641,10 +641,10 @@ async function personalReminders(now: Date) {
   if (await done(`rm:${key}`)) return "already sent";
   await markDone(`rm:${key}`);
   const what = p.id === "sunday"
-    ? `воскресная программа: ${p.program.map(([t, s]) => `${t} ${s.toLowerCase()}`).join(", ")}`
-    : `прасад и киртан`;
+    ? `воскресная программа:\n${p.program.map(([t, s]) => `${t} — ${s.trim().replace(/[.\s]+$/, "")}`).join("\n")}`
+    : `прасад и киртан.`;
   const sent = await notifySubs(
-    `🔔 <b>Сегодня в ${p.start}</b> — ${esc(what)}.${p.note ? `\n✨ ${esc(p.note)}` : ""}\n\n📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>\n\nЖдём вас! Харе Кришна 🙏`,
+    `🔔 <b>Сегодня в ${p.start}</b> — ${esc(what)}${p.note ? `\n✨ ${esc(p.note)}` : ""}\n\n📍 ул. Чайковского, 82 — <a href="${ADDRESS_LINK}">как добраться</a>\n\nЖдём вас! Харе Кришна 🙏`,
     { inline_keyboard: [[{ text: "🔕 Больше не напоминать", callback_data: "unsub" }]] },
   );
   return `sent ${sent}`;
