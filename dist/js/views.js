@@ -1,9 +1,9 @@
 // Разметка экранов и шторок. Только чистые функции: данные → HTML-строка.
-import { icon } from './icons.js?v=34';
+import { icon } from './icons.js?v=36';
 import {
   STATUS, addDays, buildEvents, daysBetween, toMinutes, effectiveStatus, isLive, relativeDay, timeRange, calendarUrl,
   formatDayMonth, formatWeekdayShort, dayNumber, formatMonthShort,
-} from './schedule.js?v=34';
+} from './schedule.js?v=36';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const ext = (url, label, cls = 'button button--secondary') =>
@@ -68,7 +68,7 @@ function eventRow(e, ctx, { showDate = false } = {}) {
       <span class="event-meta">${showDate ? `${esc(formatWeekdayShort(e.date))}, ${esc(e.start)} · ` : ''}${esc(place?.name || '')}</span>
       ${off && e.note ? `<span class="event-note event-note--${e.state}">${esc(e.note)}</span>` : ''}
       <span class="event-tags">${showDate && STATUS[e.state].chip === 'regular' ? '' : statusChip(e.state, e.live)}${e.guest && !off ? `<span class="chip chip--guest">${icon('star')}${esc(e.guest)}</span>` : ''}</span>
-      <span class="event-more">${off || e.state === 'completed' ? 'Подробнее' : 'Программа и маршрут'}${icon('chevron')}</span>
+      <span class="event-more">${off || e.state === 'completed' || place?.online ? 'Подробнее' : 'Программа и маршрут'}${icon('chevron')}</span>
     </span>
   </button>`;
 }
@@ -162,10 +162,10 @@ function nextCard(ctx, e) {
     <p class="overline">${e.live ? 'Сейчас в храме' : 'Ближайшая программа'}</p>
     <h2 class="next-title">${esc(e.title)}</h2>
     <p class="next-when">${icon('calendar')}<span>${esc(relativeDay(e.date, ctx.now.date))} · ${esc(timeRange(e))}</span></p>
-    ${place ? `<p class="next-when">${icon('pin')}<span>${esc(place.name)}${place.address ? `, ${esc(place.address)}` : ''}</span></p>` : ''}
+    ${place ? `<p class="next-when">${icon(place.online ? 'globe' : 'pin')}<span>${esc(place.name)}${place.address ? `, ${esc(place.address)}` : ''}</span></p>` : ''}
     <div class="event-tags">${statusChip(e.state, e.live)}${e.guest ? `<span class="chip chip--guest">${icon('star')}${esc(e.guest)}</span>` : ''}</div>
     <div class="next-actions">
-      ${place ? ext(mapsUrl(place.query), `${icon('pin')}Маршрут`, 'button button--primary') : ''}
+      ${place?.online ? ext(place.online, `${icon('globe')}Войти в Zoom`, 'button button--primary') : place ? ext(mapsUrl(place.query), `${icon('pin')}Маршрут`, 'button button--primary') : ''}
       <button class="button button--secondary" type="button" data-event="${esc(e.id)}">Подробнее</button>
     </div>
     ${freshness(ctx)}
@@ -256,7 +256,7 @@ export function eventSheet(ctx, e) {
 
   <dl class="facts">
     <div>${icon('calendar')}<dt>Когда</dt><dd>${esc(relativeDay(e.date, ctx.now.date))}<br><span class="muted">${esc(timeRange(e))}</span></dd></div>
-    ${place ? `<div>${icon('pin')}<dt>Где</dt><dd>${esc(place.name)}<br><span class="muted">${esc(place.address)}</span></dd></div>` : ''}
+    ${place ? `<div>${icon(place.online ? 'globe' : 'pin')}<dt>Где</dt><dd>${esc(place.name)}<br><span class="muted">${esc(place.address)}</span></dd></div>` : ''}
     ${e.guest ? `<div>${icon('star')}<dt>Гость</dt><dd>${esc(e.guest)}</dd></div>` : ''}
   </dl>
 
@@ -265,8 +265,8 @@ export function eventSheet(ctx, e) {
     ${e.generated ? '<p class="footnote">Обычный порядок по сайту храма. Точное время — в анонсе в канале.</p>' : ''}` : ''}
 
   <div class="sheet-actions">
-    ${upcomingEvent && place ? ext(mapsUrl(place.query), `${icon('pin')}Как добраться`, 'button button--primary') : ''}
-    ${upcomingEvent ? ext(calendarUrl(e, place ? `${place.name}, ${place.address}, Батуми` : 'Батуми'), `${icon('calendar')}Добавить в календарь`) : ''}
+    ${upcomingEvent && place?.online ? ext(place.online, `${icon('globe')}Войти в Zoom`, 'button button--primary') : upcomingEvent && place ? ext(mapsUrl(place.query), `${icon('pin')}Как добраться`, 'button button--primary') : ''}
+    ${upcomingEvent ? ext(calendarUrl(e, place?.online ? `Zoom: ${place.online}` : place ? `${place.name}, ${place.address}, Батуми` : 'Батуми'), `${icon('calendar')}Добавить в календарь`) : ''}
     ${ext(lastSource, `${icon('send')}${e.sources.length ? 'Сообщение в канале' : 'Проверить анонс в канале'}`, upcomingEvent ? 'button button--secondary' : 'button button--primary')}
   </div>
   ${e.sources.length > 1 ? `<p class="footnote sources">История: ${e.sources.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener" data-link>${i ? 'обновление' : 'анонс'}</a>`).join(' → ')}</p>` : ''}

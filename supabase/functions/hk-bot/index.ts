@@ -111,18 +111,18 @@ async function isLive() {
 }
 
 type Sent = { ok: boolean; message_id: number | null; test?: boolean; description?: string };
-async function channelPost(png: Uint8Array | null, text: string): Promise<Sent> {
+async function channelPost(png: Uint8Array | null, text: string, kb: unknown = POST_KB): Promise<Sent> {
   if (!(await isLive())) {
     for (const a of await admins()) {
       await say(a.chat_id, "🧪 <b>Тестовый режим</b> — в канал это не ушло. Так будет выглядеть пост:").catch(() => {});
-      if (png) await tgPhoto(a.chat_id, png, text, POST_KB).catch(() => {});
-      else await say(a.chat_id, text, POST_KB).catch(() => {});
+      if (png) await tgPhoto(a.chat_id, png, text, kb).catch(() => {});
+      else await say(a.chat_id, text, kb).catch(() => {});
     }
     return { ok: true, message_id: null, test: true };
   }
   const r = png
-    ? await tgPhoto(CHANNEL, png, text, POST_KB)
-    : await tg("sendMessage", { chat_id: CHANNEL, text, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: POST_KB });
+    ? await tgPhoto(CHANNEL, png, text, kb)
+    : await tg("sendMessage", { chat_id: CHANNEL, text, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: kb });
   return r.ok ? { ok: true, message_id: r.result.message_id } : { ok: false, message_id: null, description: r.description };
 }
 const postLink = (id: number | null) => (id ? `https://t.me/${CHANNEL.slice(1)}/${id}` : null);
@@ -650,6 +650,54 @@ async function personalReminders(now: Date) {
   return `sent ${sent}`;
 }
 
+// ---------------- утренняя джапа онлайн (Пн, Ср, Пт, Сб в 7:00) ----------------
+const JAPA_DAYS = [1, 3, 5, 6];
+const ZOOM_URL = "https://us06web.zoom.us/j/86753881803?pwd=cuq42WwqeioE5FjSUdRROdt06VzUpj.1";
+const ZOOM_KB = { inline_keyboard: [
+  [{ text: "💻 Войти в Zoom", url: ZOOM_URL }],
+  [{ text: "📅 Расписание", url: `${BOT_LINK}?startapp=schedule` }],
+] };
+const JAPA_NOW = `📿 <b>Утренняя джапа начинается!</b>
+
+Сейчас, в 7:00, повторяем святые имена вместе с Дживанатхом прабху, учеником Шрилы Прабхупады.
+
+💻 Ссылка на Zoom: ${ZOOM_URL}
+Идентификатор: 867 5388 1803
+Код доступа: Hare
+
+Или нажмите кнопку «Войти в Zoom» ниже 👇`;
+const JAPA_ANNOUNCE = `🙏 Харе Кришна, дорогие друзья!
+
+Теперь у нас есть <b>утренняя джапа онлайн</b>. Встречаем день святыми именами вместе с <b>Дживанатхом прабху</b>, учеником Шрилы Прабхупады.
+
+🕖 <b>7:00 по Батуми</b>
+📅 Понедельник, среда, пятница и суббота
+
+Ссылку на Zoom будем присылать сюда, в канал, в 7:00 в день джапы.
+Берите чётки и присоединяйтесь! 📿`;
+const ANNOUNCE_KB = { inline_keyboard: [[{ text: "📅 Расписание", url: `${BOT_LINK}?startapp=schedule` }]] };
+
+// preview — только админам в личку, канал не трогаем
+async function toAdmins(text: string, kb: unknown) {
+  for (const a of await admins()) await say(a.chat_id, "👁 <b>Предпросмотр</b> — в канал это не ушло:\n\n" + text, kb).catch(() => {});
+  return { ok: true, preview: true };
+}
+
+async function japaPost(key: string) {
+  if (await done(`mj:${key}`)) return "already posted";
+  const res = await channelPost(null, JAPA_NOW, ZOOM_KB);
+  if (!res.ok) { await notifyAdmins(`⚠️ Не удалось отправить в канал ссылку на утреннюю джапу: ${esc(res.description ?? "ошибка")}`); return res.description; }
+  await markDone(`mj:${key}`, res.message_id);
+  return res.test ? "test" : "posted";
+}
+
+async function japaAnnounce() {
+  if (await done("an:japa")) return { ok: false, reason: "already announced" };
+  const res = await channelPost(null, JAPA_ANNOUNCE, ANNOUNCE_KB);
+  if (res.ok) await markDone("an:japa", res.message_id);
+  return { ...res, link: postLink(res.message_id) };
+}
+
 // Раз в 15 минут (pg_cron): всё, что пора сделать
 async function tick() {
   const now = nowTb();
@@ -663,6 +711,7 @@ async function tick() {
   if ((wd === 5 && h === 19) || (wd === 6 && h === 11)) await run("remind", () => remind());
   if ((wd === 2 || wd === 4) && h >= 10 && h < 13) await run("weekday", () => weekdayPost(today));
   if (h >= 18 && h < 21) await run("fest", () => festRemind());
+  if (JAPA_DAYS.includes(wd) && h === 7 && now.getUTCMinutes() < 45) await run("japa", () => japaPost(today));
   await run("personal", () => personalReminders(now));
   return { ok: true, at: now.toISOString().slice(0, 16), ...res };
 }
@@ -745,6 +794,7 @@ const HELP = `🙏 Харе Кришна! Я веду анонсы програ�
 • <b>воскресенье</b> — анонс с афишей в субботу в 14:00;
 • <b>вторник и четверг</b> — пост «Сегодня прасад и киртан» в 10:00 в день программы;
 • <b>накануне экадаши</b> — пост в 18:00 с временем выхода из поста для Батуми.
+• <b>утренняя джапа онлайн</b> — ссылка на Zoom в 7:00 по понедельникам, средам, пятницам и субботам.
 Подписчикам (/remind) я напоминаю о программе за 2 часа до начала.
 
 <b>Кнопки внизу:</b>
@@ -1173,6 +1223,8 @@ Deno.serve(async (req) => {
       }
     }
     if (task === "remind") return Response.json(await remind());
+    if (task === "japa") return Response.json(url.searchParams.get("preview") === "1" ? await toAdmins(JAPA_NOW, ZOOM_KB) : { ok: false, reason: "only preview" });
+    if (task === "japaannounce") return Response.json(url.searchParams.get("preview") === "1" ? await toAdmins(JAPA_ANNOUNCE, ANNOUNCE_KB) : await japaAnnounce());
     if (task === "setup") return Response.json(await setup());
     if (task === "festremind") return Response.json(await festRemind(url.searchParams.get("test") === "1"));
     if (req.method === "POST") {

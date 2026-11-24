@@ -85,7 +85,7 @@ export function buildEvents(content, { from, to }) {
   for (let day = from; day <= to; day = addDays(day, 1)) {
     const wd = weekday(day);
     for (const r of content.regular) {
-      if (r.weekday !== wd || overridden.has(`${r.id}|${day}`)) continue;
+      if (!(r.weekdays || [r.weekday]).includes(wd) || overridden.has(`${r.id}|${day}`)) continue;
       generated.push({ ...r, id: `${r.id}-${day}`, series: r.id, date: day, sources: [], generated: true });
     }
   }
