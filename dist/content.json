@@ -402,7 +402,7 @@
   ],
   "recordings": [],
   "donations": {
-    "verifiedAt": "2026-11-22",
+    "verifiedAt": "2026-11-25",
     "methods": [
       {
         "id": "tbank",
@@ -441,12 +441,12 @@
         "fields": [
           {
             "label": "IBAN",
-            "value": "GE48TB7070345061200003",
+            "value": "GE26TB7567445064400018",
             "format": "iban"
           },
           {
             "label": "Получатель",
-            "value": "Tatiana Smolina"
+            "value": "RAJAN KAMLESH"
           }
         ],
         "extra": {
