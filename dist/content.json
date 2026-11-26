@@ -402,7 +402,7 @@
   ],
   "recordings": [],
   "donations": {
-    "verifiedAt": "2026-11-25",
+    "verifiedAt": "2026-11-26",
     "methods": [
       {
         "id": "tbank",
@@ -483,7 +483,7 @@
         "fields": [
           {
             "label": "Адрес кошелька · TRC20",
-            "value": "TEAp4gtjZ722LPCmeaXWiuhKmRGsbm6zj7",
+            "value": "TA3Lhf3YZpsGXq3Y5YVmZrL2N7Cc7G3aZz",
             "format": "address"
           }
         ],
